@@ -11,27 +11,26 @@ output reg code_valid;
 output reg [7:0] HC1, HC2, HC3, HC4, HC5, HC6;
 output reg [7:0] M1, M2, M3, M4, M5, M6;
 //============================================
-parameter idle       = 5'd0;   // idle
-parameter rec        = 5'd1;   //reset 
-parameter CNT_OUT    = 5'd2;   //send cnt to output
-parameter ini_sort_1_1 = 5'd3;   //
-parameter ini_sort_1_2 = 5'd4;   //
+parameter idle       	 = 5'd0;   // idle
+parameter rec        	 = 5'd1;   //reset 
+parameter CNT_OUT    	 = 5'd2;   //send cnt to output
+parameter ini_sort_1_1 	 = 5'd3;   //
+parameter ini_sort_1_2 	 = 5'd4;   //
 parameter ini_sort_2_1_1 = 5'd5;   //
 parameter ini_sort_2_1_2 = 5'd6;   //
 parameter ini_sort_2_2_1 = 5'd7;   //
 parameter ini_sort_2_2_2 = 5'd8;   //
-parameter ini_sort_3_1 = 5'd9;   //
-parameter ini_sort_3_2 = 5'd10;   //
-parameter ini_sort_3_3 = 5'd11;   //
-parameter ini_sort_3_4 = 5'd12;   //
-parameter ini_sort_3_5 = 5'd13;   //
-parameter ini_sort_2 = 5'd;   //
-parameter ini_sort_3 = 5'd;   //
-parameter insert_1   = 5'd;   //
-parameter insert_2   = 5'd;   //
-parameter insert_3   = 5'd;   //
-parameter insert_4   = 5'd;   //
-parameter done       = 5'd;  // 
+parameter ini_sort_3_1   = 5'd9;   //
+parameter ini_sort_3_2   = 5'd10;   //
+parameter ini_sort_3_3   = 5'd11;   //
+parameter ini_sort_3_4   = 5'd12;   //
+parameter ini_sort_3_5   = 5'd13;   //
+parameter insert_1       = 5'd14;   //
+parameter insert_2       = 5'd15;   //
+parameter insert_3       = 5'd16;   //
+parameter insert_4       = 5'd17;   //
+parameter split          = 5'd18;   //
+parameter done           = 5'd;  // 
 
 
 //============================================
