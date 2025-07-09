@@ -318,74 +318,74 @@ assign merge_index = merge_index_1 + merge_index_2;
 always@(*) begin
 case (cs) 
 	ini_sort_1_1 : begin
-		com_in1 = CNT2;
-		com_in2 = CNT3;
+		com_in1 <= CNT2;
+		com_in2 <= CNT3;
 		end
 	ini_sort_1_2 : begin
-		com_in1 = CNT5;
-		com_in2 = CNT6;
+		com_in1 <= CNT5;
+		com_in2 <= CNT6;
 	end
 	ini_sort_2_1_1 : begin
-		com_in1 = TABLE1 [1][1];
-		com_index_1 = TABLE1 [1][2];
-		com_in2 = TABLE1 [2][1];
-		com_index_2 = TABLE1 [2][2];
+		com_in1 <= TABLE1 [1][1];
+		com_index_1 <= TABLE1 [1][2];
+		com_in2 <= TABLE1 [2][1];
+		com_index_2 <= TABLE1 [2][2];
 	end
 	ini_sort_2_1_2 : begin
-		com_in1 = TABLE1 [1][1];
-		com_index_1 = TABLE1 [1][2];
-		com_in2 = TABLE1 [2][1];
-		com_index_2 = TABLE1 [2][2];
+		com_in1 <= TABLE1 [1][1];
+		com_index_1 <= TABLE1 [1][2];
+		com_in2 <= TABLE1 [2][1];
+		com_index_2 <= TABLE1 [2][2];
 	end
 	ini_sort_2_2_1 : begin
-		com_in1 = TABLE1 [4][1];
-		com_index_1 = TABLE1 [4][2];
-		com_in2 = TABLE1 [5][1];
-		com_index_2 = TABLE1 [5][2];
+		com_in1 <= TABLE1 [4][1];
+		com_index_1 <= TABLE1 [4][2];
+		com_in2 <= TABLE1 [5][1];
+		com_index_2 <= TABLE1 [5][2];
 	end
 	ini_sort_2_2_2 : begin
-		com_in1 = TABLE1 [4][1];
-		com_index_1 = TABLE1 [4][2];
-		com_in2 = TABLE1 [5][1];
-		com_index_2 = TABLE1 [5][2];
+		com_in1 <= TABLE1 [4][1];
+		com_index_1 <= TABLE1 [4][2];
+		com_in2 <= TABLE1 [5][1];
+		com_index_2 <= TABLE1 [5][2];
 	end
 	ini_sort_3_1 : begin
-		com_in1 = temp [1][1];
-		com_index_1 = temp [1][2];
-		com_in2 = temp [4][1];
-		com_index_2 = temp [4][2];
+		com_in1 <= temp [1][1];
+		com_index_1 <= temp [1][2];
+		com_in2 <= temp [4][1];
+		com_index_2 <= temp [4][2];
 	end
 	ini_sort_3_2 : begin
-		com_in1 = temp [1][1];
-		com_index_1 = temp [1][2];
-		com_in2 = temp [4][1];
-		com_index_2 = temp [4][2];
+		com_in1 <= temp [1][1];
+		com_index_1 <= temp [1][2];
+		com_in2 <= temp [4][1];
+		com_index_2 <= temp [4][2];
 
 	end
 	ini_sort_3_3 : begin
-		com_in1 = temp [1][1];
-		com_index_1 = temp [1][2];
-		com_in2 = temp [4][1];
-		com_index_2 = temp [4][2];
+		com_in1 <= temp [1][1];
+		com_index_1 <= temp [1][2];
+		com_in2 <= temp [4][1];
+		com_index_2 <= temp [4][2];
 
 	end
 	ini_sort_3_4 : begin
-		com_in1 = temp [1][1];
-		com_index_1 = temp [1][2];
-		com_in2 = temp [4][1];
-		com_index_2 = temp [4][2];
+		com_in1 <= temp [1][1];
+		com_index_1 <= temp [1][2];
+		com_in2 <= temp [4][1];
+		com_index_2 <= temp [4][2];
 	end
 	ini_sort_3_5 : begin
-		com_in1 = temp [1][1];
-		com_index_1 = temp [1][2];
-		com_in2 = temp [4][1];
-		com_index_2 = temp [4][2];
+		com_in1 <= temp [1][1];
+		com_index_1 <= temp [1][2];
+		com_in2 <= temp [4][1];
+		com_index_2 <= temp [4][2];
 	end
-	default : begin
-		com_in1 = temp [1][1];
-		com_index_1 = temp [1][2];
-		com_in2 = temp [2][1];
-		com_index_2 = temp [2][2];
+	default : begin ///////insert階段全都是比較temp[1] & [2]
+		com_in1 <= temp [1][1];
+		com_index_1 <= temp [1][2];
+		com_in2 <= temp [2][1];
+		com_index_2 <= temp [2][2];
 	end
 endcase
 end
@@ -405,7 +405,18 @@ always@(*) begin
 			merge_index_1 <= TABLE2[1][2];
 			merge_index_2 <= TABLE2[2][2];
 		end
-
+		insert_ini_3: begin
+			merge_cnt_1 <= TABLE3[1][1];
+			merge_cnt_2 <= TABLE3[2][1];
+			merge_index_1 <= TABLE3[1][2];
+			merge_index_2 <= TABLE3[2][2];
+		end
+		insert_ini_4: begin
+			merge_cnt_1 <= TABLE4[1][1];
+			merge_cnt_2 <= TABLE4[2][1];
+			merge_index_1 <= TABLE4[1][2];
+			merge_index_2 <= TABLE4[2][2];
+		end
 
 	endcase
 end
@@ -446,14 +457,18 @@ always@(posedge clk) begin
 				temp[6][1] <= the_inverse_one_have_be_put;
 				temp[6][2] <= the_inverse_index_have_be_put;
 			end
-			insert_1 : begin
+			insert_ini_1 : begin
 				
 			end
-			insert_2 : begin
+			insert_ini_2 : begin
 				
 			end
-
-
+			insert_ini_3 : begin
+				
+			end
+			insert_ini_4 : begin
+				
+			end
 
 
 		endcase
