@@ -251,7 +251,7 @@ endmodule
 
 
 module sorting (cs,clk,reset,CNT1, CNT2, CNT3, CNT4, CNT5, CNT6, ini_sort_3_finish, insert_1_finish, insert_2_finish,insert_3_finish,
-	code_valid, HC1, HC2, HC3, HC4, HC5, HC6,M1, M2, M3, M4, M5, M6 	   );
+	code_valid, HC1, HC2, HC3, HC4, HC5, HC6,M1, M2, M3, M4, M5, M6);
 //process sort and merge algo in ini sort state
 //process insertion algo in the following state
 //using cs to control
@@ -305,11 +305,35 @@ assign merge_cnt = merge_cnt_1 + merge_cnt_2;
 assign merge_index = merge_index_1 + merge_index_2;
 
 
-
+//============================================
+parameter idle       	 = 5'd0;   // idle
+parameter rec        	 = 5'd1;   //reset 
+parameter CNT_OUT    	 = 5'd2;   //send cnt to output
+parameter ini_sort_1_1 	 = 5'd3;   //
+parameter ini_sort_1_2 	 = 5'd4;   //
+parameter ini_sort_2_1_1 = 5'd5;   //
+parameter ini_sort_2_1_2 = 5'd6;   //
+parameter ini_sort_2_2_1 = 5'd7;   //
+parameter ini_sort_2_2_2 = 5'd8;   //
+parameter ini_sort_3_1   = 5'd9;   //
+parameter ini_sort_3_2   = 5'd10;  //
+parameter ini_sort_3_3   = 5'd11;  //
+parameter ini_sort_3_4   = 5'd12;  //
+parameter ini_sort_3_5   = 5'd13;  //
+parameter insert_ini_1   = 5'd14;  //
+parameter insert_1       = 5'd15;  //
+parameter insert_ini_2   = 5'd16;  //
+parameter insert_2       = 5'd17;  //
+parameter insert_ini_3   = 5'd18;  //
+parameter insert_3       = 5'd19;  //
+parameter insert_ini_4   = 5'd20;  //其實不需要這個狀態，只是方便程式可讀性以及方便共用combinational邏輯!
+parameter insert_4       = 5'd21;  //
+parameter split          = 5'd22;  //
+parameter done           = 5'd23;  // 
 // =========================================== INDEX ==========================================
 	//  - com_in1 & 2 com_index_1 & 2
 	//  - merge cnt1&2 merge idx 1& 2
-	//  -
+	//  - TABLE1-6
 	//  -
 	//  - 
 	//  - 
@@ -575,7 +599,42 @@ always@(posedge clk) begin
 
 end
 
+///TABLE1-6
+//integer J,K,Q,W,E,R;//對應1-6
 
+always@(posedge clk) begin
+	if (reset) begin
+		for (i = 1; i <= 6; i = i + 1) begin
+			TABLE1[J][1] <= 8'd0;
+			TABLE1[J][2] <= 8'd0;
+		end
+		for (i = 1; i <= 5; i = i+1) begin
+			TABLE2[K][1] <= 8'd0;
+			TABLE2[K][2] <= 8'd0;
+		end
+		for (i = 1; i <= 4; i = i+1) begin
+			TABLE3[Q][1] <= 8'd0;
+			TABLE3[Q][2] <= 8'd0;
+		end
+		for (i = 1; i <= 3; i = i+1) begin
+			TABLE4[W][1] <= 8'd0;
+			TABLE4[W][2] <= 8'd0;
+		end
+		for (i = 1; i <= 2; i = E+1) begin
+			TABLE5[E][1] <= 8'd0;
+			TABLE5[E][2] <= 8'd0;
+		end
+
+	end
+
+	else begin
+
+
+	end
+
+
+
+end
 
 
 
