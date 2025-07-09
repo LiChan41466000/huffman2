@@ -298,18 +298,21 @@ assign com2_is_zero_1 = !(|com_in2);//1代表全0,0代表有一
 assign which_one_have_be_put = (equal_signal_1)? ((com_index)?com_in2:com_in1) :((com_out_1)?com_in1:com_in2);
 assign which_index_have_be_put = (equal_signal_1)? ((com_index)?com_index_2:com_index_1) :((com_out_1)?com_index_1:com_index_2);
 ////找出兩個比較項中，出現次數比較大的項目;若相等，則找出index較小的項目
-assign the_inverse_one_have_be_put = (equal_signal_1)? ((com_index)?com_index_1:com_index_2) :((com_out_1)?com_index_2:com_index_1);
-assign the_inverse_index_have_be_put = (equal_signal_1)? ((com_index)?com_index_1:com_index_2) :((com_out_1)?com_index_2:com_index_2);
+assign the_inverse_one_have_be_put = (equal_signal_1)? ((com_index)?com_in1:com_in2) :((com_out_1)?com_in2:com_in1);
+assign the_inverse_index_have_be_put = (equal_signal_1)? ((com_index)?com_index_1:com_index_2) :((com_out_1)?com_index_2:com_index_1);
 
 assign merge_cnt = merge_cnt_1 + merge_cnt_2;
 assign merge_index = merge_index_1 + merge_index_2;
+
+
+
 // =========================================== INDEX ==========================================
 	//  - com_in1 & 2 com_index_1 & 2
+	//  - merge cnt1&2 merge idx 1& 2
+	//  -
+	//  -
 	//  - 
-	//  - merge_cnt_1
-	//  - merge_cnt_2
-	//  - merge_index_1
-	//  - merge_index_2
+	//  - 
 //============================================
 
 
@@ -424,7 +427,7 @@ end
 
 
 
-///temp///
+///temp reg & insert_finish signal//
 integer i;
 
 always@(posedge clk) begin
@@ -433,9 +436,60 @@ always@(posedge clk) begin
 			temp[i][1] <= 8'd0;
 			temp[i][2] <= 8'd0;
 		end
+		insert_1_finish <= 1'd0;
+		insert_2_finish <= 1'd0;
+		insert_3_finish <= 1'd0;
 	end
 
 	else begin
+
+		if(cs == insert_1 && cs == insert_2 && cs == insert_3 && cs == insert_4) begin
+			if(com1_is_zero_1 && com2_is_zero_1) begin
+				case(cs)
+					insert_1 :
+						insert_1_finish <= 1'd1;
+					insert_2 :
+						insert_2_finish <= 1'd1;
+					insert_3 :
+						insert_3_finish <= 1'd1;
+				endcase
+			end
+			else if(com1_is_zero_1 && !com2_is_zero_1) begin //代表合併項已經被放入table，temp6:2直接右移，temp[2]要放進tanl2
+				tmep[6][1] <= 8'd0;
+				temp[6][2] <= 8'd0;
+				temp[5][1] <= tmep[6][1];
+				temp[5][2] <= tmep[6][2];
+				temp[4][1] <= tmep[5][1];
+				temp[4][2] <= tmep[5][2];
+				temp[3][1] <= tmep[4][1];
+				temp[3][2] <= tmep[4][2];
+				temp[2][1] <= tmep[3][1];
+				temp[2][2] <= tmep[3][2];
+			end
+			else if ((!com1_is_zero_1 && com2_is_zero_1) || equal_signal_1 || com_out_1) begin
+				 //第一個判斷代表temp6:2已全被放到table裡面，直接把temp1丟去table並更新為0就好,下一周期就會觸發判斷全0
+				 //第二個判斷代表temp[1]和temp[2]皆不是0並相等，直接把合併後的項temp[1]丟進去table並且把temp[1]更新為0(此處描述temp暫存器故僅更新為0)
+				 //第三個判斷代表若temp[1]<temp[2]且都不是0，把temp[1]的項丟進去table並更新為0
+				temp[1][1] <= 8'd0;
+				temp[1][2] <= 8'd0;
+			end
+			else if (!com_out_1) begin //代表若temp[1]>temp[2]且都不是0，把temp[2]放進table並右移temp6:2
+				tmep[6][1] <= 8'd0;
+				temp[6][2] <= 8'd0;
+				temp[5][1] <= tmep[6][1];
+				temp[5][2] <= tmep[6][2];
+				temp[4][1] <= tmep[5][1];
+				temp[4][2] <= tmep[5][2];
+				temp[3][1] <= tmep[4][1];
+				temp[3][2] <= tmep[4][2];
+				temp[2][1] <= tmep[3][1];
+				temp[2][2] <= tmep[3][2];
+			end
+
+
+		end
+
+
 		case (cs)
 			ini_sort_2_1_1: begin
 				temp[1][1] <= which_one_have_be_put;
@@ -458,16 +512,61 @@ always@(posedge clk) begin
 				temp[6][2] <= the_inverse_index_have_be_put;
 			end
 			insert_ini_1 : begin
-				
+				temp[1][1] <= merge_cnt;
+				temp[1][2] <= merge_index;
+				temp[2][1] <= TABLE1[3][1];
+				temp[2][2] <= TABLE1[3][2];
+				temp[3][1] <= TABLE1[4][1];
+				temp[3][2] <= TABLE1[4][2];
+				temp[4][1] <= TABLE1[5][1];
+				temp[4][2] <= TABLE1[5][2];
+				temp[5][1] <= TABLE1[6][1];
+				temp[5][2] <= TABLE1[6][2];
+				temp[6][1] <= 8'd0;
+				temp[6][2] <= 8'd0;
+
 			end
 			insert_ini_2 : begin
-				
+				temp[1][1] <= merge_cnt;
+				temp[1][2] <= merge_index;
+				temp[2][1] <= TABLE2[3][1];
+				temp[2][2] <= TABLE2[3][2];
+				temp[3][1] <= TABLE2[4][1];
+				temp[3][2] <= TABLE2[4][2];
+				temp[4][1] <= TABLE2[5][1];
+				temp[4][2] <= TABLE2[5][2];
+				temp[5][1] <= 8'd0;
+				temp[5][2] <= 8'd0;
+				temp[6][1] <= 8'd0;
+				temp[6][2] <= 8'd0;
 			end
 			insert_ini_3 : begin
-				
+				temp[1][1] <= merge_cnt;
+				temp[1][2] <= merge_index;
+				temp[2][1] <= TABLE3[3][1];
+				temp[2][2] <= TABLE3[3][2];
+				temp[3][1] <= TABLE3[4][1];
+				temp[3][2] <= TABLE3[4][2];
+				temp[4][1] <= 8'd0;
+				temp[4][2] <= 8'd0;
+				temp[5][1] <= 8'd0;
+				temp[5][2] <= 8'd0;
+				temp[6][1] <= 8'd0;
+				temp[6][2] <= 8'd0;
 			end
 			insert_ini_4 : begin
-				
+				temp[1][1] <= merge_cnt;
+				temp[1][2] <= merge_index;
+				temp[2][1] <= TABLE4[3][1];
+				temp[2][2] <= TABLE4[3][2];
+				temp[3][1] <= 8'd0;
+				temp[3][2] <= 8'd0;
+				temp[4][1] <= 8'd0;
+				temp[4][2] <= 8'd0;
+				temp[5][1] <= 8'd0;
+				temp[5][2] <= 8'd0;
+				temp[6][1] <= 8'd0;
+				temp[6][2] <= 8'd0;
 			end
 
 
