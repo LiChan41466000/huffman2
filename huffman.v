@@ -31,9 +31,10 @@ parameter insert_ini_2   = 5'd16;  //
 parameter insert_2       = 5'd17;  //
 parameter insert_ini_3   = 5'd18;  //
 parameter insert_3       = 5'd19;  //
-parameter insert_4       = 5'd20;  //
-parameter split          = 5'd21;  //
-parameter done           = 5'd22;  // 
+parameter insert_ini_4   = 5'd20;  //其實不需要這個狀態，只是方便程式可讀性以及方便共用combinational邏輯!
+parameter insert_4       = 5'd21;  //
+parameter split          = 5'd22;  //
+parameter done           = 5'd23;  // 
 
 
 //============================================
@@ -115,11 +116,14 @@ always @ (*) begin
 
 		insert_3 :
 			if(insert_3_finish) begin
-				ns = insert_4;
+				ns = insert_ini_4;
 			end
 			else begin
 				ns = insert_3;
 			end
+
+		insert_ini_4 :
+			ns = insert_4;
 
 		insert_4 :
 			ns = split;
@@ -262,9 +266,6 @@ output reg [7:0] HC1, HC2, HC3, HC4, HC5, HC6;
 output reg [7:0] M1, M2, M3, M4, M5, M6;
 
 
-
-
-
 wire com_out_1;
 wire equal_signal_1;
 wire com1_is_zero_1;
@@ -273,10 +274,7 @@ wire [7:0] merge_cnt;
 wire [7:0] merge_index;
 wire [7:0] which_one_have_be_put;
 
-//wire com_out_2;
-//wire equal_signal_2;
-//wire com4_is_zero;
-//wire com5_is_zero;
+
 ////////注意每個index也是開到8bit是可以再優化，但因為寫法方便先暫用陣列
 reg [7:0] com_in1,com_in2;
 //reg [5:0] com_in4,com_in5;
@@ -401,7 +399,12 @@ always@(*) begin
 			merge_index_1 <= TABLE1[1][2];
 			merge_index_2 <= TABLE1[2][2];
 		end
-
+		insert_ini_2: begin
+			merge_cnt_1 <= TABLE2[1][1];
+			merge_cnt_2 <= TABLE2[2][1];
+			merge_index_1 <= TABLE2[1][2];
+			merge_index_2 <= TABLE2[2][2];
+		end
 
 
 	endcase
