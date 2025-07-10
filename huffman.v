@@ -250,7 +250,7 @@ end
 endmodule
 
 
-module sorting (cs,clk,reset,CNT1, CNT2, CNT3, CNT4, CNT5, CNT6, ini_sort_3_finish, insert_1_finish, insert_2_finish,insert_3_finish,
+module sorting (cs,clk,reset, CNT1, CNT2, CNT3, CNT4, CNT5, CNT6, ini_sort_3_finish, insert_1_finish, insert_2_finish,insert_3_finish,
 	code_valid, HC1, HC2, HC3, HC4, HC5, HC6,M1, M2, M3, M4, M5, M6);
 //process sort and merge algo in ini sort state
 //process insertion algo in the following state
@@ -291,12 +291,16 @@ reg [7:0] com_index_2,com_index_1;
 assign com_out_1 = (com_in1 < com_in2)? 1:0;
 assign equal_signal_1 = (com_in1 == com_in2)?1:0;
 assign com_index = (com_index_1 < com_index_2)?1:0;//機率一樣時，大的放下面
-assign com1_is_zero_1 = !(|com_in1);//1代表全0,0代表有一
-assign com2_is_zero_1 = !(|com_in2);//1代表全0,0代表有一
+assign com1_is_zero_1 = !(|com_index_1);//1代表全0,0代表有一
+assign com2_is_zero_1 = !(|com_index_2);//1代表全0,0代表有一，用index比較是怕測資有任一symbol都沒有出現
 
 ////找出兩個比較項中，出現次數比較小的項目;若相等，則找出index較大的項目
 assign which_one_have_be_put = (equal_signal_1)? ((com_index)?com_in2:com_in1) :((com_out_1)?com_in1:com_in2);
 assign which_index_have_be_put = (equal_signal_1)? ((com_index)?com_index_2:com_index_1) :((com_out_1)?com_index_1:com_index_2);
+////在ini_sort_2_1_1及2_2_1中，記憶哪一個reg該被大的覆蓋，若1代表覆蓋com_in1代表的TABLE1暫存。反之亦然
+assign which_reg_should_be_replaced = (equal_signal_1)? ((com_index)?0:1) :((com_out_1)?1:0);
+
+
 ////找出兩個比較項中，出現次數比較大的項目;若相等，則找出index較小的項目
 assign the_inverse_one_have_be_put = (equal_signal_1)? ((com_index)?com_in1:com_in2) :((com_out_1)?com_in2:com_in1);
 assign the_inverse_index_have_be_put = (equal_signal_1)? ((com_index)?com_index_1:com_index_2) :((com_out_1)?com_index_2:com_index_1);
@@ -330,11 +334,21 @@ parameter insert_ini_4   = 5'd20;  //其實不需要這個狀態，只是方便�
 parameter insert_4       = 5'd21;  //
 parameter split          = 5'd22;  //
 parameter done           = 5'd23;  // 
+
+
+parameter symbol1 		= 8'b00000001;
+parameter symbol2 		= 8'b00000010;
+parameter symbol3 		= 8'b00000100;
+parameter symbol4 		= 8'b00001000;
+parameter symbol5 		= 8'b00010000;
+parameter symbol6 		= 8'b00100000;
+
+
 // =========================================== INDEX ==========================================
 	//  - com_in1 & 2 com_index_1 & 2
 	//  - merge cnt1&2 merge idx 1& 2
 	//  - TABLE1-6
-	//  -
+	//  - split
 	//  - 
 	//  - 
 //============================================
@@ -347,10 +361,15 @@ case (cs)
 	ini_sort_1_1 : begin
 		com_in1 <= CNT2;
 		com_in2 <= CNT3;
+		com_index_1 <= symbol2;
+		com_index_2 <= symbol3;
+
 		end
 	ini_sort_1_2 : begin
 		com_in1 <= CNT5;
 		com_in2 <= CNT6;
+		com_index_1 <= symbol5;
+		com_index_2 <= symbol6;
 	end
 	ini_sort_2_1_1 : begin
 		com_in1 <= TABLE1 [1][1];
@@ -408,7 +427,7 @@ case (cs)
 		com_in2 <= temp [4][1];
 		com_index_2 <= temp [4][2];
 	end
-	default : begin ///////insert階段全都是比較temp[1] & [2]
+	default : begin ///////   insert   階段全都是比較temp[1] & [2]
 		com_in1 <= temp [1][1];
 		com_index_1 <= temp [1][2];
 		com_in2 <= temp [2][1];
@@ -460,14 +479,15 @@ always@(posedge clk) begin
 			temp[i][1] <= 8'd0;
 			temp[i][2] <= 8'd0;
 		end
-		insert_1_finish <= 1'd0;
-		insert_2_finish <= 1'd0;
-		insert_3_finish <= 1'd0;
+		ini_sort_3_finish <= 1'd0;
+		insert_1_finish   <= 1'd0;
+		insert_2_finish   <= 1'd0;
+		insert_3_finish   <= 1'd0;
 	end
 
 	else begin
 
-		if(cs == insert_1 && cs == insert_2 && cs == insert_3 && cs == insert_4) begin
+		if(cs == insert_1 || cs == insert_2 || cs == insert_3 || cs == insert_4) begin
 			if(com1_is_zero_1 && com2_is_zero_1) begin
 				case(cs)
 					insert_1 :
@@ -535,6 +555,86 @@ always@(posedge clk) begin
 				temp[6][1] <= the_inverse_one_have_be_put;
 				temp[6][2] <= the_inverse_index_have_be_put;
 			end
+
+			ini_sort_3_1 : begin
+				case(which_reg_should_be_replaced)	
+					1'b1 : //成立代表temp[1]被放入table1內，故位移temp[3-1]
+						temp[3][1] <= 8'd0;
+						temp[3][2] <= 8'd0;
+						temp[2][1] <= temp[3][1];
+						temp[2][2] <= temp[3][2];
+						temp[1][1] <= temp[2][1];
+						temp[1][2] <= temp[2][2];
+					1'b0 : //代表temp [4]被放入table1內，故位移temp[6-4]
+						temp[6][1] <= 8'd0;
+						temp[6][2] <= 8'd0;
+						temp[5][1] <= temp[6][1];
+						temp[5][2] <= temp[6][2];
+						temp[4][1] <= temp[5][1];
+						temp[4][2] <= temp[5][2];
+				endcase
+			end
+			ini_sort_3_2 : begin
+				case(which_reg_should_be_replaced)	
+					1'b1 : //成立代表temp[1]被放入table1內，故位移temp[3-1]
+						temp[3][1] <= 8'd0;
+						temp[3][2] <= 8'd0;
+						temp[2][1] <= temp[3][1];
+						temp[2][2] <= temp[3][2];
+						temp[1][1] <= temp[2][1];
+						temp[1][2] <= temp[2][2];
+					1'b0 : //代表temp [4]被放入table1內，故位移temp[6-4]
+						temp[6][1] <= 8'd0;
+						temp[6][2] <= 8'd0;
+						temp[5][1] <= temp[6][1];
+						temp[5][2] <= temp[6][2];
+						temp[4][1] <= temp[5][1];
+						temp[4][2] <= temp[5][2];
+				endcase
+			end
+			ini_sort_3_3 : begin
+				case(which_reg_should_be_replaced)	
+					1'b1 : //成立代表temp[1]被放入table1內，故位移temp[3-1]
+						temp[3][1] <= 8'd0;
+						temp[3][2] <= 8'd0;
+						temp[2][1] <= temp[3][1];
+						temp[2][2] <= temp[3][2];
+						temp[1][1] <= temp[2][1];
+						temp[1][2] <= temp[2][2];
+					1'b0 : //代表temp [4]被放入table1內，故位移temp[6-4]
+						temp[6][1] <= 8'd0;
+						temp[6][2] <= 8'd0;
+						temp[5][1] <= temp[6][1];
+						temp[5][2] <= temp[6][2];
+						temp[4][1] <= temp[5][1];
+						temp[4][2] <= temp[5][2];
+				endcase
+			end
+			ini_sort_3_4 : begin
+				if(!(|temp[1][2]) || !(|temp[4][2])) begin //先判斷是否兩組比較暫存是否有一組全0,若有拉起結束訊號
+					ini_sort_3_finish <=1'd1;
+				end
+				else begin
+					case(which_reg_should_be_replaced)	
+						1'b1 : //成立代表temp[1]被放入table1內，故位移temp[3-1]
+							temp[3][1] <= 8'd0;
+							temp[3][2] <= 8'd0;
+							temp[2][1] <= temp[3][1];
+							temp[2][2] <= temp[3][2];
+							temp[1][1] <= temp[2][1];
+							temp[1][2] <= temp[2][2];
+						1'b0 : //代表temp [4]被放入table1內，故位移temp[6-4]
+							temp[6][1] <= 8'd0;
+							temp[6][2] <= 8'd0;
+							temp[5][1] <= temp[6][1];
+							temp[5][2] <= temp[6][2];
+							temp[4][1] <= temp[5][1];
+							temp[4][2] <= temp[5][2];
+					endcase
+
+				end
+			end
+
 			insert_ini_1 : begin
 				temp[1][1] <= merge_cnt;
 				temp[1][2] <= merge_index;
@@ -605,39 +705,160 @@ end
 always@(posedge clk) begin
 	if (reset) begin
 		for (i = 1; i <= 6; i = i + 1) begin
-			TABLE1[J][1] <= 8'd0;
-			TABLE1[J][2] <= 8'd0;
+			TABLE1[i][1] <= 8'd0;
+			TABLE1[i][2] <= 8'd0;
 		end
 		for (i = 1; i <= 5; i = i+1) begin
-			TABLE2[K][1] <= 8'd0;
-			TABLE2[K][2] <= 8'd0;
+			TABLE2[i][1] <= 8'd0;
+			TABLE2[i][2] <= 8'd0;
 		end
 		for (i = 1; i <= 4; i = i+1) begin
-			TABLE3[Q][1] <= 8'd0;
-			TABLE3[Q][2] <= 8'd0;
+			TABLE3[i][1] <= 8'd0;
+			TABLE3[i][2] <= 8'd0;
 		end
 		for (i = 1; i <= 3; i = i+1) begin
-			TABLE4[W][1] <= 8'd0;
-			TABLE4[W][2] <= 8'd0;
+			TABLE4[i][1] <= 8'd0;
+			TABLE4[i][2] <= 8'd0;
 		end
-		for (i = 1; i <= 2; i = E+1) begin
-			TABLE5[E][1] <= 8'd0;
-			TABLE5[E][2] <= 8'd0;
+		for (i = 1; i <= 2; i = i+1) begin
+			TABLE5[i][1] <= 8'd0;
+			TABLE5[i][2] <= 8'd0;
 		end
 
 	end
 
 	else begin
+		case(cs)
+			ini_sort_1_1 : begin
+				TABLE1[1][1] <= CNT1;
+				TABLE1[1][2] <= symbol1;
+				TABLE1[2][1] <= which_one_have_be_put;
+				TABLE1[2][2] <= which_index_have_be_put;
+				TABLE1[3][1] <= the_inverse_one_have_be_put;
+				TABLE1[3][2] <= the_inverse_index_have_be_put;
+			end
+
+			ini_sort_1_2 : begin
+				TABLE1[4][1] <= CNT4;
+				TABLE1[4][2] <= symbol4;
+				TABLE1[5][1] <= which_one_have_be_put;
+				TABLE1[5][2] <= which_index_have_be_put;
+				TABLE1[6][1] <= the_inverse_one_have_be_put;
+				TABLE1[6][2] <= the_inverse_index_have_be_put;
+			end
+
+			ini_sort_2_1_1 : begin
+				if(which_reg_should_be_replaced) begin //若成立代表[1]的被放進temp reg，故用[3]取代
+					TABLE1[1][1] <= TABLE1[3][1];
+					TABLE1[1][2] <= TABLE1[3][2];
+				end
+				else begin
+					TABLE1[2][1] <= TABLE1[3][1];
+					TABLE1[2][2] <= TABLE1[3][2];
+				end
+			end
+
+			ini_sort_2_2_1 : begin
+				if(which_reg_should_be_replaced) begin //若成立代表[4]的被放進temp reg，故用[6]取代
+					TABLE1[4][1] <= TABLE1[6][1];
+					TABLE1[4][2] <= TABLE1[6][2];
+				end
+				else begin
+					TABLE1[5][1] <= TABLE1[6][1];
+					TABLE1[5][2] <= TABLE1[6][2];
+				end
+
+			end
+			ini_sort_3_1 : begin
+				TABLE1[1][1] <= which_one_have_be_put;
+				TABLE1[1][2] <= which_index_have_be_put;
+			end
+
+			ini_sort_3_2 : begin
+				TABLE1[2][1] <= which_one_have_be_put;
+				TABLE1[2][2] <= which_index_have_be_put;
+			end
+
+			ini_sort_3_3 : begin
+				TABLE1[3][1] <= which_one_have_be_put;
+				TABLE1[3][2] <= which_index_have_be_put;
+			end
+
+			ini_sort_3_4 : begin
+				if(com1_is_zero_1) begin //先判斷是否兩組比較暫存是否有一組全0,若有把另一邊全輸入到table
+					TABLE1[4][1] <= temp[4][1]; 
+					TABLE1[4][2] <= temp[4][2];
+					TABLE1[5][1] <= temp[5][1]; 
+					TABLE1[5][2] <= temp[5][2];
+					TABLE1[6][1] <= temp[6][1]; 
+					TABLE1[6][2] <= temp[6][2];
+				end
+
+				else if (com2_is_zero_1) begin
+					TABLE1[4][1] <= temp[1][1]; 
+					TABLE1[4][2] <= temp[1][2];
+					TABLE1[5][1] <= temp[2][1]; 
+					TABLE1[5][2] <= temp[2][2];
+					TABLE1[6][1] <= temp[3][1]; 
+					TABLE1[6][2] <= temp[3][2];
+
+				end
+
+				else begin //若無則正常排序
+					TABLE1[4][1] <= which_one_have_be_put;
+					TABLE1[4][2] <= which_index_have_be_put;
+				end
+			end
 
 
+			ini_sort_3_5 : begin
+				TABLE1[5][1] <= which_one_have_be_put;
+				TABLE1[5][2] <= which_index_have_be_put;
+				TABLE1[6][1] <= the_inverse_one_have_be_put;
+				TABLE1[6][2] <= the_inverse_index_have_be_put;
+			end
+
+			insert_1 : begin
+				TABLE2[5][1] <= which_one_have_be_put;
+				TABLE2[5][2] <= which_index_have_be_put;
+				TABLE2[4][1] <= TABLE2[5][1];
+				TABLE2[4][2] <= TABLE2[5][2];
+				TABLE2[3][1] <= TABLE2[4][1];
+				TABLE2[3][2] <= TABLE2[4][2];
+				TABLE2[2][1] <= TABLE2[3][1];
+				TABLE2[2][2] <= TABLE2[3][2];
+				TABLE2[1][1] <= TABLE2[2][1];
+				TABLE2[1][2] <= TABLE2[2][2];
+			end
+
+			insert_2 : begin
+				TABLE3[4][1] <= which_one_have_be_put;
+				TABLE3[4][2] <= which_index_have_be_put;
+				TABLE3[3][1] <= TABLE3[4][1];
+				TABLE3[3][2] <= TABLE3[4][2];
+				TABLE3[2][1] <= TABLE3[3][1];
+				TABLE3[2][2] <= TABLE3[3][2];
+				TABLE3[1][1] <= TABLE3[2][1];
+				TABLE3[1][2] <= TABLE3[2][2];
+			end
+
+			insert_3 : begin
+				TABLE4[3][1] <= which_one_have_be_put;
+				TABLE4[3][2] <= which_index_have_be_put;
+				TABLE4[2][1] <= TABLE4[3][1];
+				TABLE4[2][2] <= TABLE4[3][2];
+				TABLE4[1][1] <= TABLE4[2][1];
+				TABLE4[1][2] <= TABLE4[2][2];
+			end
+			insert_4 : begin
+				TABLE5[1][1] <= which_one_have_be_put;
+				TABLE5[1][2] <= which_index_have_be_put;
+				TABLE5[2][1] <= the_inverse_one_have_be_put;
+				TABLE5[2][2] <= the_inverse_index_have_be_put;
+			end
+		endcase
 	end
-
-
-
 end
-
-
-
 
 
 
