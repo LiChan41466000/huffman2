@@ -346,6 +346,7 @@ assign which_index_have_be_put = (equal_signal_1)? ((com_index)?com_index_2:com_
 assign which_reg_should_be_replaced = (equal_signal_1)? ((com_index)?0:1) :((com_out_1)?1:0);
 
 
+
 ////找出兩個比較項中，出現次數比較大的項目;若相等，則找出index較小的項目
 assign the_inverse_one_have_be_put = (equal_signal_1)? ((com_index)?com_in1:com_in2) :((com_out_1)?com_in2:com_in1);
 assign the_inverse_index_have_be_put = (equal_signal_1)? ((com_index)?com_index_1:com_index_2) :((com_out_1)?com_index_2:com_index_1);
@@ -534,6 +535,58 @@ always@(*) begin
 	endcase
 end
 
+//		insert_1_finish
+always@(*) begin
+	case(cs)
+		insert_1 : begin
+			if(com1_is_zero_1 && com2_is_zero_1) begin
+				insert_1_finish <= 1'd1;
+			end
+			else begin
+				insert_1_finish <= 1'd0;
+			end
+		end
+		default : begin
+			insert_1_finish <= 1'd0;
+		end
+
+	endcase
+end
+
+//		insert_2_finish
+always@(*) begin
+	case(cs)
+		insert_2 : begin
+			if(com1_is_zero_1 && com2_is_zero_1) begin
+				insert_2_finish <= 1'd1;
+			end
+			else begin
+				insert_2_finish <= 1'd0;
+			end
+		end
+		default : begin
+			insert_2_finish <= 1'd0;
+		end
+
+	endcase
+end
+//		insert_3_finish
+always@(*) begin
+	case(cs)
+		insert_3 : begin
+			if(com1_is_zero_1 && com2_is_zero_1) begin
+				insert_3_finish <= 1'd1;
+			end
+			else begin
+				insert_3_finish <= 1'd0;
+			end
+		end
+		default : begin
+			insert_3_finish <= 1'd0;
+		end
+
+	endcase
+end
 
 ///temp reg & insert_finish signal//
 integer i;
@@ -545,25 +598,26 @@ always@(posedge clk) begin
 			temp[i][2] <= 8'd0;
 		end
 //		ini_sort_3_finish <= 1'd0;
-		insert_1_finish   <= 1'd0;
-		insert_2_finish   <= 1'd0;
-		insert_3_finish   <= 1'd0;
+//		insert_1_finish   <= 1'd0;
+//		insert_2_finish   <= 1'd0;
+//		insert_3_finish   <= 1'd0;
 	end
 
 	else begin
 
 		if(cs == insert_1 || cs == insert_2 || cs == insert_3 || cs == insert_4) begin
-			if(com1_is_zero_1 && com2_is_zero_1) begin
-				case(cs)
-					insert_1 :
-						insert_1_finish <= 1'd1;
-					insert_2 :
-						insert_2_finish <= 1'd1;
-					insert_3 :
-						insert_3_finish <= 1'd1;
-				endcase
-			end
-			else if(com1_is_zero_1 && !com2_is_zero_1) begin //代表合併項已經被放入table，temp6:2直接右移，temp[2]要放進tanl2
+//			if(com1_is_zero_1 && com2_is_zero_1) begin
+//				case(cs)
+//					insert_1 :
+//						insert_1_finish <= 1'd1;
+//					insert_2 :
+//						insert_2_finish <= 1'd1;
+//					insert_3 :
+//						insert_3_finish <= 1'd1;
+//				endcase
+//			end
+//			else 
+			if(com1_is_zero_1 && !com2_is_zero_1) begin //代表合併項已經被放入table，temp6:2直接右移，temp[2]要放進tanl2
 				temp[6][1] <= 8'd0;
 				temp[6][2] <= 8'd0;
 				temp[5][1] <= temp[6][1];
@@ -891,36 +945,107 @@ always@(posedge clk) begin
 			end
 
 			insert_1 : begin
-				TABLE2[5][1] <= which_one_have_be_put;
-				TABLE2[5][2] <= which_index_have_be_put;
-				TABLE2[4][1] <= TABLE2[5][1];
-				TABLE2[4][2] <= TABLE2[5][2];
-				TABLE2[3][1] <= TABLE2[4][1];
-				TABLE2[3][2] <= TABLE2[4][2];
-				TABLE2[2][1] <= TABLE2[3][1];
-				TABLE2[2][2] <= TABLE2[3][2];
-				TABLE2[1][1] <= TABLE2[2][1];
-				TABLE2[1][2] <= TABLE2[2][2];
+				if(com1_is_zero_1 && com2_is_zero_1)begin
+					TABLE2[5][1] <= TABLE2[5][1];
+					TABLE2[5][2] <= TABLE2[5][2];
+					TABLE2[4][1] <= TABLE2[4][1];
+					TABLE2[4][2] <= TABLE2[4][2];
+					TABLE2[3][1] <= TABLE2[3][1];
+					TABLE2[3][2] <= TABLE2[3][2];
+					TABLE2[2][1] <= TABLE2[2][1];
+					TABLE2[2][2] <= TABLE2[2][2];
+					TABLE2[1][1] <= TABLE2[1][1];
+					TABLE2[1][2] <= TABLE2[1][2];
+				end
+
+				else begin
+					if(com1_is_zero_1 && !com2_is_zero_1)begin
+						TABLE2[5][1] <= temp[2][1];
+						TABLE2[5][2] <= temp[2][2];
+					end
+					else if(!com1_is_zero_1 && com2_is_zero_1) begin
+						TABLE2[5][1] <= temp[1][1];
+						TABLE2[5][2] <= temp[1][2];
+					end
+					else begin
+						TABLE2[5][1] <= which_one_have_be_put;
+						TABLE2[5][2] <= which_index_have_be_put;
+					end
+					TABLE2[4][1] <= TABLE2[5][1];
+					TABLE2[4][2] <= TABLE2[5][2];
+					TABLE2[3][1] <= TABLE2[4][1];
+					TABLE2[3][2] <= TABLE2[4][2];
+					TABLE2[2][1] <= TABLE2[3][1];
+					TABLE2[2][2] <= TABLE2[3][2];
+					TABLE2[1][1] <= TABLE2[2][1];
+					TABLE2[1][2] <= TABLE2[2][2];
+					end
 			end
 
 			insert_2 : begin
-				TABLE3[4][1] <= which_one_have_be_put;
-				TABLE3[4][2] <= which_index_have_be_put;
-				TABLE3[3][1] <= TABLE3[4][1];
-				TABLE3[3][2] <= TABLE3[4][2];
-				TABLE3[2][1] <= TABLE3[3][1];
-				TABLE3[2][2] <= TABLE3[3][2];
-				TABLE3[1][1] <= TABLE3[2][1];
-				TABLE3[1][2] <= TABLE3[2][2];
+				if(com1_is_zero_1 && com2_is_zero_1)begin
+					TABLE3[4][1] <= TABLE3[4][1];
+					TABLE3[4][2] <= TABLE3[4][2];
+					TABLE3[3][1] <= TABLE3[3][1];
+					TABLE3[3][2] <= TABLE3[3][2];
+					TABLE3[2][1] <= TABLE3[2][1];
+					TABLE3[2][2] <= TABLE3[2][2];
+					TABLE3[1][1] <= TABLE3[1][1];
+					TABLE3[1][2] <= TABLE3[1][2];
+				end
+
+				else begin
+					if(com1_is_zero_1 && !com2_is_zero_1)begin
+						TABLE3[4][1] <= temp[2][1];
+						TABLE3[4][2] <= temp[2][2];
+					end
+					else if(!com1_is_zero_1 && com2_is_zero_1) begin
+						TABLE3[4][1] <= temp[1][1];
+						TABLE3[4][2] <= temp[1][2];
+					end
+					else begin
+						TABLE3[4][1] <= which_one_have_be_put;
+						TABLE3[4][2] <= which_index_have_be_put;
+					end
+					TABLE3[3][1] <= TABLE3[4][1];
+					TABLE3[3][2] <= TABLE3[4][2];
+					TABLE3[2][1] <= TABLE3[3][1];
+					TABLE3[2][2] <= TABLE3[3][2];
+					TABLE3[1][1] <= TABLE3[2][1];
+					TABLE3[1][2] <= TABLE3[2][2];
+				end
 			end
 
 			insert_3 : begin
-				TABLE4[3][1] <= which_one_have_be_put;
-				TABLE4[3][2] <= which_index_have_be_put;
-				TABLE4[2][1] <= TABLE4[3][1];
-				TABLE4[2][2] <= TABLE4[3][2];
-				TABLE4[1][1] <= TABLE4[2][1];
-				TABLE4[1][2] <= TABLE4[2][2];
+				if(com1_is_zero_1 && com2_is_zero_1)begin
+					TABLE4[3][1] <= TABLE4[3][1];
+					TABLE4[3][2] <= TABLE4[3][2];
+					TABLE4[2][1] <= TABLE4[2][1];
+					TABLE4[2][2] <= TABLE4[2][2];
+					TABLE4[1][1] <= TABLE4[1][1];
+					TABLE4[1][2] <= TABLE4[1][2];
+				end
+
+				else begin
+					if(com1_is_zero_1 && !com2_is_zero_1)begin
+						TABLE4[3][1] <= temp[2][1];
+						TABLE4[3][2] <= temp[2][2];
+					end
+					else if(!com1_is_zero_1 && com2_is_zero_1) begin
+						TABLE4[3][1] <= temp[1][1];
+						TABLE4[3][2] <= temp[1][2];
+					end
+					else begin
+						TABLE4[3][1] <= which_one_have_be_put;
+						TABLE4[3][2] <= which_index_have_be_put;
+					end
+					//TABLE4[3][1] <= which_one_have_be_put;
+					//TABLE4[3][2] <= which_index_have_be_put;
+					TABLE4[2][1] <= TABLE4[3][1];
+					TABLE4[2][2] <= TABLE4[3][2];
+					TABLE4[1][1] <= TABLE4[2][1];
+					TABLE4[1][2] <= TABLE4[2][2];
+				end
 			end
 			insert_4 : begin
 				TABLE5[1][1] <= which_one_have_be_put;
@@ -1414,6 +1539,7 @@ always@(posedge clk) begin
 end
 
 wire [7:0] T5_2,T5_1,  T4_3,T4_2,T4_1, T3_4,T3_3,T3_2,T3_1, T2_5,T2_4,T2_3,T2_2,T2_1, T1_6,T1_5,T1_4,T1_3,T1_2,T1_1;
+wire [7:0] temp_1,temp_2,temp_3,temp_4,temp_5,temp_6;
 
 assign T5_2 = TABLE5[2][2];
 assign T5_1 = TABLE5[1][2];
@@ -1446,7 +1572,12 @@ assign T1_3 = TABLE1[3][2];
 assign T1_2 = TABLE1[2][2];
 assign T1_1 = TABLE1[1][2];
 
-
+assign temp_6 = temp[6][2];
+assign temp_5 = temp[5][2];
+assign temp_4 = temp[4][2];
+assign temp_3 = temp[3][2];
+assign temp_2 = temp[2][2];
+assign temp_1 = temp[1][2];
 
 endmodule
 
