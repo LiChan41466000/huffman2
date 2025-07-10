@@ -517,7 +517,22 @@ always@(*) begin
 	endcase
 end
 
+//ini_sort_3_finish
+always@(*) begin
+	case(cs)
+		ini_sort_3_4: begin
+			if(!(|temp[1][2]) || !(|temp[4][2])) begin //先判斷是否兩組比較暫存是否有一組全0,若有拉起結束訊號
+				ini_sort_3_finish <=1'd1;
+			end
+			else begin
+				ini_sort_3_finish <=1'd0;
+			end
+		end
 
+		default :
+			ini_sort_3_finish <=1'd0;
+	endcase
+end
 
 
 ///temp reg & insert_finish signal//
@@ -529,7 +544,7 @@ always@(posedge clk) begin
 			temp[i][1] <= 8'd0;
 			temp[i][2] <= 8'd0;
 		end
-		ini_sort_3_finish <= 1'd0;
+//		ini_sort_3_finish <= 1'd0;
 		insert_1_finish   <= 1'd0;
 		insert_2_finish   <= 1'd0;
 		insert_3_finish   <= 1'd0;
@@ -667,10 +682,10 @@ always@(posedge clk) begin
 				endcase
 			end
 			ini_sort_3_4 : begin
-				if(!(|temp[1][2]) || !(|temp[4][2])) begin //先判斷是否兩組比較暫存是否有一組全0,若有拉起結束訊號
-					ini_sort_3_finish <=1'd1;
-				end
-				else begin
+//				if(!(|temp[1][2]) || !(|temp[4][2])) begin //先判斷是否兩組比較暫存是否有一組全0,若有拉起結束訊號
+//					ini_sort_3_finish <=1'd1;
+//				end
+///				else begin
 					case(which_reg_should_be_replaced)	
 						1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
 							temp[3][1] <= 8'd0;
@@ -691,7 +706,7 @@ always@(posedge clk) begin
 					endcase
 
 				end
-			end
+//			end
 
 			insert_ini_1 : begin
 				temp[1][1] <= merge_cnt;
