@@ -73,13 +73,17 @@ always @ (*) begin
 			end
 			
 		CNT_OUT :
-			ns = encoding;
+			ns = ini_sort_1_1;
 		ini_sort_1_1 :
 			ns = ini_sort_1_2;
 		ini_sort_1_2 :
 			ns = ini_sort_2_1_1;
+		ini_sort_2_1_1 :
+			ns = ini_sort_2_1_2;
+
 		ini_sort_2_1_2 :
 			ns = ini_sort_2_2_1;
+		
 		ini_sort_2_2_1 :
 			ns = ini_sort_2_2_2;
 		ini_sort_2_2_2 :
@@ -95,7 +99,7 @@ always @ (*) begin
 				ns = insert_ini_1;
 			end 
 			else
-				ns = ini_sort_3_5
+				ns = ini_sort_3_5;
 		ini_sort_3_5 :
 			ns = insert_ini_1;
 
@@ -311,7 +315,8 @@ wire com1_is_zero_1;
 wire com2_is_zero_1;
 wire [7:0] merge_cnt;
 wire [7:0] merge_index;
-wire [7:0] which_one_have_be_put;
+wire [7:0] which_one_have_be_put, which_index_have_be_put, the_inverse_one_have_be_put, the_inverse_index_have_be_put;
+wire which_reg_should_be_replaced;
 
 
 ////////注意每個index也是開到8bit是可以再優化，但因為寫法方便先暫用陣列
@@ -323,6 +328,7 @@ reg [7:0] TABLE3 [4:1][2:1];//table for sort
 reg [7:0] TABLE4 [3:1][2:1];//table for sort
 reg [7:0] TABLE5 [2:1][2:1];//table for sort
 reg [7:0] temp   [6:1][2:1];
+reg [7:0] merge_cnt_1,merge_cnt_2,merge_index_1,merge_index_2;
 
 ////判斷邏輯////共用部分////
 reg [7:0] com_index_2,com_index_1;
@@ -375,7 +381,7 @@ parameter split_1        = 5'd22;  //
 parameter split_2        = 5'd23;  //
 parameter split_3        = 5'd24;  //
 parameter split_4        = 5'd25;  //
-parameter split_4        = 5'd26;  //
+parameter split_5        = 5'd26;  //
 parameter code_valid_OUT = 5'd27;  //
 parameter done           = 5'd28;  // 
 
@@ -543,16 +549,16 @@ always@(posedge clk) begin
 				endcase
 			end
 			else if(com1_is_zero_1 && !com2_is_zero_1) begin //代表合併項已經被放入table，temp6:2直接右移，temp[2]要放進tanl2
-				tmep[6][1] <= 8'd0;
+				temp[6][1] <= 8'd0;
 				temp[6][2] <= 8'd0;
-				temp[5][1] <= tmep[6][1];
-				temp[5][2] <= tmep[6][2];
-				temp[4][1] <= tmep[5][1];
-				temp[4][2] <= tmep[5][2];
-				temp[3][1] <= tmep[4][1];
-				temp[3][2] <= tmep[4][2];
-				temp[2][1] <= tmep[3][1];
-				temp[2][2] <= tmep[3][2];
+				temp[5][1] <= temp[6][1];
+				temp[5][2] <= temp[6][2];
+				temp[4][1] <= temp[5][1];
+				temp[4][2] <= temp[5][2];
+				temp[3][1] <= temp[4][1];
+				temp[3][2] <= temp[4][2];
+				temp[2][1] <= temp[3][1];
+				temp[2][2] <= temp[3][2];
 			end
 			else if ((!com1_is_zero_1 && com2_is_zero_1) || equal_signal_1 || com_out_1) begin
 				 //第一個判斷代表temp6:2已全被放到table裡面，直接把temp1丟去table並更新為0就好,下一周期就會觸發判斷全0
@@ -562,16 +568,16 @@ always@(posedge clk) begin
 				temp[1][2] <= 8'd0;
 			end
 			else if (!com_out_1) begin //代表若temp[1]>temp[2]且都不是0，把temp[2]放進table並右移temp6:2
-				tmep[6][1] <= 8'd0;
+				temp[6][1] <= 8'd0;
 				temp[6][2] <= 8'd0;
-				temp[5][1] <= tmep[6][1];
-				temp[5][2] <= tmep[6][2];
-				temp[4][1] <= tmep[5][1];
-				temp[4][2] <= tmep[5][2];
-				temp[3][1] <= tmep[4][1];
-				temp[3][2] <= tmep[4][2];
-				temp[2][1] <= tmep[3][1];
-				temp[2][2] <= tmep[3][2];
+				temp[5][1] <= temp[6][1];
+				temp[5][2] <= temp[6][2];
+				temp[4][1] <= temp[5][1];
+				temp[4][2] <= temp[5][2];
+				temp[3][1] <= temp[4][1];
+				temp[3][2] <= temp[4][2];
+				temp[2][1] <= temp[3][1];
+				temp[2][2] <= temp[3][2];
 			end
 
 
@@ -602,56 +608,62 @@ always@(posedge clk) begin
 
 			ini_sort_3_1 : begin
 				case(which_reg_should_be_replaced)	
-					1'b1 : //成立代表temp[1]被放入table1內，故位移temp[3-1]
+					1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
 						temp[3][1] <= 8'd0;
 						temp[3][2] <= 8'd0;
 						temp[2][1] <= temp[3][1];
 						temp[2][2] <= temp[3][2];
 						temp[1][1] <= temp[2][1];
 						temp[1][2] <= temp[2][2];
-					1'b0 : //代表temp [4]被放入table1內，故位移temp[6-4]
+					end
+					1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
 						temp[6][1] <= 8'd0;
 						temp[6][2] <= 8'd0;
 						temp[5][1] <= temp[6][1];
 						temp[5][2] <= temp[6][2];
 						temp[4][1] <= temp[5][1];
 						temp[4][2] <= temp[5][2];
+					end
 				endcase
 			end
 			ini_sort_3_2 : begin
 				case(which_reg_should_be_replaced)	
-					1'b1 : //成立代表temp[1]被放入table1內，故位移temp[3-1]
+					1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
 						temp[3][1] <= 8'd0;
 						temp[3][2] <= 8'd0;
 						temp[2][1] <= temp[3][1];
 						temp[2][2] <= temp[3][2];
 						temp[1][1] <= temp[2][1];
 						temp[1][2] <= temp[2][2];
-					1'b0 : //代表temp [4]被放入table1內，故位移temp[6-4]
+					end
+					1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
 						temp[6][1] <= 8'd0;
 						temp[6][2] <= 8'd0;
 						temp[5][1] <= temp[6][1];
 						temp[5][2] <= temp[6][2];
 						temp[4][1] <= temp[5][1];
 						temp[4][2] <= temp[5][2];
+					end
 				endcase
 			end
 			ini_sort_3_3 : begin
 				case(which_reg_should_be_replaced)	
-					1'b1 : //成立代表temp[1]被放入table1內，故位移temp[3-1]
+					1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
 						temp[3][1] <= 8'd0;
 						temp[3][2] <= 8'd0;
 						temp[2][1] <= temp[3][1];
 						temp[2][2] <= temp[3][2];
 						temp[1][1] <= temp[2][1];
 						temp[1][2] <= temp[2][2];
-					1'b0 : //代表temp [4]被放入table1內，故位移temp[6-4]
+					end
+					1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
 						temp[6][1] <= 8'd0;
 						temp[6][2] <= 8'd0;
 						temp[5][1] <= temp[6][1];
 						temp[5][2] <= temp[6][2];
 						temp[4][1] <= temp[5][1];
 						temp[4][2] <= temp[5][2];
+					end
 				endcase
 			end
 			ini_sort_3_4 : begin
@@ -660,20 +672,22 @@ always@(posedge clk) begin
 				end
 				else begin
 					case(which_reg_should_be_replaced)	
-						1'b1 : //成立代表temp[1]被放入table1內，故位移temp[3-1]
+						1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
 							temp[3][1] <= 8'd0;
 							temp[3][2] <= 8'd0;
 							temp[2][1] <= temp[3][1];
 							temp[2][2] <= temp[3][2];
 							temp[1][1] <= temp[2][1];
 							temp[1][2] <= temp[2][2];
-						1'b0 : //代表temp [4]被放入table1內，故位移temp[6-4]
+						end
+						1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
 							temp[6][1] <= 8'd0;
 							temp[6][2] <= 8'd0;
 							temp[5][1] <= temp[6][1];
 							temp[5][2] <= temp[6][2];
 							temp[4][1] <= temp[5][1];
 							temp[4][2] <= temp[5][2];
+						end
 					endcase
 
 				end
@@ -1383,9 +1397,6 @@ always@(posedge clk) begin
 		endcase
 	end
 end
-
-
-
 
 endmodule
 

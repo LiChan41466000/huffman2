@@ -124,6 +124,7 @@ initial begin
 end
 
 initial begin
+  $display("MODIFY VERSION!");
   #50000; // 根據模擬情況調整這個時間，例如 50,000ns
   $display("Timeout: simulation did not finish in expected time.");
   $finish;
