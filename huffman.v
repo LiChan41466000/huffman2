@@ -966,11 +966,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_4 : begin
-				if(TABLE4[2][2][0] == 1'd1) begin
+				if(TABLE2[2][2][0] == 1'd1) begin
 					HC1 <= {HC1[6:0],1'b0};
 					M1  <= {M1[6:0],1'b1};
 				end
-				else if(TABLE4[1][2][0] == 1'd1) begin
+				else if(TABLE2[1][2][0] == 1'd1) begin
 					HC1 <= {HC1[6:0],1'b1};
 					M1  <= {M1[6:0],1'b1};
 				end
@@ -980,11 +980,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_5 : begin
-				if(TABLE5[2][2][0] == 1'd1) begin
+				if(TABLE1[2][2][0] == 1'd1) begin
 					HC1 <= {HC1[6:0],1'b0};
 					M1  <= {M1[6:0],1'b1};
 				end
-				else if(TABLE5[1][2][0] == 1'd1) begin
+				else if(TABLE1[1][2][0] == 1'd1) begin
 					HC1 <= {HC1[6:0],1'b1};
 					M1  <= {M1[6:0],1'b1};
 				end
@@ -1047,11 +1047,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_4 : begin
-				if(TABLE4[2][2][1] == 1'd1) begin
+				if(TABLE2[2][2][1] == 1'd1) begin
 					HC2 <= {HC2[6:0],1'b0};
 					M2  <= {M2[6:0],1'b1};
 				end
-				else if(TABLE4[1][2][1] == 1'd1) begin
+				else if(TABLE2[1][2][1] == 1'd1) begin
 					HC2 <= {HC2[6:0],1'b1};
 					M2  <= {M2[6:0],1'b1};
 				end
@@ -1061,11 +1061,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_5 : begin
-				if(TABLE5[2][2][1] == 1'd1) begin
+				if(TABLE1[2][2][1] == 1'd1) begin
 					HC2 <= {HC2[6:0],1'b0};
 					M2  <= {M2[6:0],1'b1};
 				end
-				else if(TABLE5[1][2][1] == 1'd1) begin
+				else if(TABLE1[1][2][1] == 1'd1) begin
 					HC2 <= {HC2[7:1],1'b1};
 					M2  <= {M2[6:0],1'b1};
 				end
@@ -1127,11 +1127,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_4 : begin
-				if(TABLE4[2][2][2] == 1'd1) begin
+				if(TABLE2[2][2][2] == 1'd1) begin
 					HC3 <= {HC3[6:0],1'b0};
 					M3  <= {M3[6:0],1'b1};
 				end
-				else if(TABLE4[1][2][2] == 1'd1) begin
+				else if(TABLE2[1][2][2] == 1'd1) begin
 					HC3 <= {HC3[6:0],1'b1};
 					M3  <= {M3[6:0],1'b1};
 				end
@@ -1141,11 +1141,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_5 : begin
-				if(TABLE5[2][2][2] == 1'd1) begin
+				if(TABLE1[2][2][2] == 1'd1) begin
 					HC3 <= {HC3[6:0],1'b0};
 					M3  <= {M3[6:0],1'b1};
 				end
-				else if(TABLE5[1][2][2] == 1'd1) begin
+				else if(TABLE1[1][2][2] == 1'd1) begin
 					HC3 <= {HC3[6:0],1'b1};
 					M3  <= {M3[6:0],1'b1};
 				end
@@ -1207,11 +1207,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_4 : begin
-				if(TABLE4[2][2][3] == 1'd1) begin
+				if(TABLE2[2][2][3] == 1'd1) begin
 					HC4 <= {HC4[6:0],1'b0};
 					M4  <= {M4[6:0],1'b1};
 				end
-				else if(TABLE4[1][2][3] == 1'd1) begin
+				else if(TABLE2[1][2][3] == 1'd1) begin
 					HC4 <= {HC4[6:0],1'b1};
 					M4  <= {M4[6:0],1'b1};
 				end
@@ -1221,11 +1221,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_5 : begin
-				if(TABLE5[2][2][3] == 1'd1) begin
+				if(TABLE1[2][2][3] == 1'd1) begin
 					HC4 <= {HC4[6:0],1'b0};
 					M4  <= {M4[6:0],1'b1};
 				end
-				else if(TABLE5[1][2][3] == 1'd1) begin
+				else if(TABLE1[1][2][3] == 1'd1) begin
 					HC4 <= {HC4[6:0],1'b1};
 					M4  <= {M4[6:0],1'b1};
 				end
@@ -1286,11 +1286,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_4 : begin
-				if(TABLE4[2][2][4] == 1'd1) begin
+				if(TABLE2[2][2][4] == 1'd1) begin
 					HC5 <= {HC5[6:0],1'b0};
 					M5  <= {M5[6:0],1'b1};
 				end
-				else if(TABLE4[1][2][4] == 1'd1) begin
+				else if(TABLE2[1][2][4] == 1'd1) begin
 					HC5 <= {HC5[6:0],1'b1};
 					M5  <= {M5[6:0],1'b1};
 				end
@@ -1300,11 +1300,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_5 : begin
-				if(TABLE5[2][2][4] == 1'd1) begin
+				if(TABLE1[2][2][4] == 1'd1) begin
 					HC5 <= {HC5[6:0],1'b0};
 					M5  <= {M5[6:0],1'b1};
 				end
-				else if(TABLE5[1][2][4] == 1'd1) begin
+				else if(TABLE1[1][2][4] == 1'd1) begin
 					HC5 <= {HC5[6:0],1'b1};
 					M5  <= {M5[6:0],1'b1};
 				end
@@ -1367,11 +1367,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_4 : begin
-				if(TABLE4[2][2][5] == 1'd1) begin
+				if(TABLE2[2][2][5] == 1'd1) begin
 					HC6 <= {HC6[6:0],1'b0};
 					M6  <= {M6[6:0],1'b1};
 				end
-				else if(TABLE4[1][2][5] == 1'd1) begin
+				else if(TABLE2[1][2][5] == 1'd1) begin
 					HC6 <= {HC6[6:0],1'b1};
 					M6  <= {M6[6:0],1'b1};
 				end
@@ -1381,11 +1381,11 @@ always@(posedge clk) begin
 				end
 			end
 			split_5 : begin
-				if(TABLE5[2][2][5] == 1'd1) begin
+				if(TABLE1[2][2][5] == 1'd1) begin
 					HC6 <= {HC6[6:0],1'b0};
 					M6  <= {M6[6:0],1'b1};
 				end
-				else if(TABLE5[1][2][5] == 1'd1) begin
+				else if(TABLE1[1][2][5] == 1'd1) begin
 					HC6 <= {HC6[6:0],1'b1};
 					M6  <= {M6[6:0],1'b1};
 				end
@@ -1397,6 +1397,41 @@ always@(posedge clk) begin
 		endcase
 	end
 end
+
+wire [7:0] T5_2,T5_1,  T4_3,T4_2,T4_1, T3_4,T3_3,T3_2,T3_1, T2_5,T2_4,T2_3,T2_2,T2_1, T1_6,T1_5,T1_4,T1_3,T1_2,T1_1;
+
+assign T5_2 = TABLE5[2][2];
+assign T5_1 = TABLE5[1][2];
+
+
+assign T4_3 = TABLE4[3][2];
+assign T4_2 = TABLE4[2][2];
+assign T4_1 = TABLE4[1][2];
+
+
+assign T3_4 = TABLE3[4][2];
+assign T3_3 = TABLE3[3][2];
+assign T3_2 = TABLE3[2][2];
+assign T3_1 = TABLE3[1][2];
+
+
+
+assign T2_5 = TABLE2[5][2];
+assign T2_4 = TABLE2[4][2];
+assign T2_3 = TABLE2[3][2];
+assign T2_2 = TABLE2[2][2];
+assign T2_1 = TABLE2[1][2];
+
+
+
+assign T1_6 = TABLE1[6][2];
+assign T1_5 = TABLE1[5][2];
+assign T1_4 = TABLE1[4][2];
+assign T1_3 = TABLE1[3][2];
+assign T1_2 = TABLE1[2][2];
+assign T1_1 = TABLE1[1][2];
+
+
 
 endmodule
 
