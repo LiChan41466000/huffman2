@@ -33,8 +33,12 @@ parameter insert_ini_3   = 5'd18;  //
 parameter insert_3       = 5'd19;  //
 parameter insert_ini_4   = 5'd20;  //其實不需要這個狀態，只是方便程式可讀性以及方便共用combinational邏輯!
 parameter insert_4       = 5'd21;  //
-parameter split          = 5'd22;  //
-parameter done           = 5'd23;  // 
+parameter split_1         = 5'd22;  //
+parameter split_2         = 5'd23;  //
+parameter split_3         = 5'd24;  //
+parameter split_4         = 5'd25;  //
+parameter split_4         = 5'd26;  //
+parameter done            = 5'd27;  // 
 
 
 //============================================
@@ -126,13 +130,20 @@ always @ (*) begin
 			ns = insert_4;
 
 		insert_4 :
-			ns = split;
-		split:
-
+			ns = split_1;
+		split_1:
+			ns = split_2;
+		split_2:
+			ns = split_3;
+		split_3:
+			ns = split_4;
+		split_4:
+			ns = split_5;
+		split_5:
+			ns = done;
 		done :
 			ns = done;
-			
-		
+
 		default : begin
 			ns = idle;
 		end
@@ -332,8 +343,12 @@ parameter insert_ini_3   = 5'd18;  //
 parameter insert_3       = 5'd19;  //
 parameter insert_ini_4   = 5'd20;  //其實不需要這個狀態，只是方便程式可讀性以及方便共用combinational邏輯!
 parameter insert_4       = 5'd21;  //
-parameter split          = 5'd22;  //
-parameter done           = 5'd23;  // 
+parameter split_1        = 5'd22;  //
+parameter split_2        = 5'd23;  //
+parameter split_3        = 5'd24;  //
+parameter split_4        = 5'd25;  //
+parameter split_4        = 5'd26;  //
+parameter done           = 5'd27;  //  
 
 
 parameter symbol1 		= 8'b00000001;
@@ -351,7 +366,7 @@ parameter symbol6 		= 8'b00100000;
 	//  - split
 	//  - 
 	//  - 
-//============================================
+//============================================ INDEX ==========================================
 
 
 
@@ -359,78 +374,78 @@ parameter symbol6 		= 8'b00100000;
 always@(*) begin
 case (cs) 
 	ini_sort_1_1 : begin
-		com_in1 <= CNT2;
-		com_in2 <= CNT3;
+		com_in1 	<= CNT2;
+		com_in2 	<= CNT3;
 		com_index_1 <= symbol2;
 		com_index_2 <= symbol3;
 
 		end
 	ini_sort_1_2 : begin
-		com_in1 <= CNT5;
-		com_in2 <= CNT6;
+		com_in1 	<= CNT5;
+		com_in2 	<= CNT6;
 		com_index_1 <= symbol5;
 		com_index_2 <= symbol6;
 	end
 	ini_sort_2_1_1 : begin
-		com_in1 <= TABLE1 [1][1];
+		com_in1 	<= TABLE1 [1][1];
 		com_index_1 <= TABLE1 [1][2];
-		com_in2 <= TABLE1 [2][1];
+		com_in2 	<= TABLE1 [2][1];
 		com_index_2 <= TABLE1 [2][2];
 	end
 	ini_sort_2_1_2 : begin
-		com_in1 <= TABLE1 [1][1];
+		com_in1 	<= TABLE1 [1][1];
 		com_index_1 <= TABLE1 [1][2];
-		com_in2 <= TABLE1 [2][1];
+		com_in2 	<= TABLE1 [2][1];
 		com_index_2 <= TABLE1 [2][2];
 	end
 	ini_sort_2_2_1 : begin
-		com_in1 <= TABLE1 [4][1];
+		com_in1 	<= TABLE1 [4][1];
 		com_index_1 <= TABLE1 [4][2];
-		com_in2 <= TABLE1 [5][1];
+		com_in2 	<= TABLE1 [5][1];
 		com_index_2 <= TABLE1 [5][2];
 	end
 	ini_sort_2_2_2 : begin
-		com_in1 <= TABLE1 [4][1];
+		com_in1 	<= TABLE1 [4][1];
 		com_index_1 <= TABLE1 [4][2];
-		com_in2 <= TABLE1 [5][1];
+		com_in2 	<= TABLE1 [5][1];
 		com_index_2 <= TABLE1 [5][2];
 	end
 	ini_sort_3_1 : begin
-		com_in1 <= temp [1][1];
+		com_in1 	<= temp [1][1];
 		com_index_1 <= temp [1][2];
-		com_in2 <= temp [4][1];
+		com_in2 	<= temp [4][1];
 		com_index_2 <= temp [4][2];
 	end
 	ini_sort_3_2 : begin
-		com_in1 <= temp [1][1];
+		com_in1 	<= temp [1][1];
 		com_index_1 <= temp [1][2];
-		com_in2 <= temp [4][1];
+		com_in2 	<= temp [4][1];
 		com_index_2 <= temp [4][2];
 
 	end
 	ini_sort_3_3 : begin
-		com_in1 <= temp [1][1];
+		com_in1 	<= temp [1][1];
 		com_index_1 <= temp [1][2];
-		com_in2 <= temp [4][1];
+		com_in2 	<= temp [4][1];
 		com_index_2 <= temp [4][2];
 
 	end
 	ini_sort_3_4 : begin
-		com_in1 <= temp [1][1];
+		com_in1 	<= temp [1][1];
 		com_index_1 <= temp [1][2];
-		com_in2 <= temp [4][1];
+		com_in2 	<= temp [4][1];
 		com_index_2 <= temp [4][2];
 	end
 	ini_sort_3_5 : begin
-		com_in1 <= temp [1][1];
+		com_in1 	<= temp [1][1];
 		com_index_1 <= temp [1][2];
-		com_in2 <= temp [4][1];
+		com_in2 	<= temp [4][1];
 		com_index_2 <= temp [4][2];
 	end
 	default : begin ///////   insert   階段全都是比較temp[1] & [2]
-		com_in1 <= temp [1][1];
+		com_in1 	<= temp [1][1];
 		com_index_1 <= temp [1][2];
-		com_in2 <= temp [2][1];
+		com_in2 	<= temp [2][1];
 		com_index_2 <= temp [2][2];
 	end
 endcase
@@ -440,26 +455,26 @@ end
 always@(*) begin
 	case(cs)
 		insert_ini_1: begin
-			merge_cnt_1 <= TABLE1[1][1];
-			merge_cnt_2 <= TABLE1[2][1];
+			merge_cnt_1 	<= TABLE1[1][1];
+			merge_cnt_2 	<= TABLE1[2][1];
 			merge_index_1 <= TABLE1[1][2];
 			merge_index_2 <= TABLE1[2][2];
 		end
 		insert_ini_2: begin
-			merge_cnt_1 <= TABLE2[1][1];
-			merge_cnt_2 <= TABLE2[2][1];
+			merge_cnt_1 	<= TABLE2[1][1];
+			merge_cnt_2 	<= TABLE2[2][1];
 			merge_index_1 <= TABLE2[1][2];
 			merge_index_2 <= TABLE2[2][2];
 		end
 		insert_ini_3: begin
-			merge_cnt_1 <= TABLE3[1][1];
-			merge_cnt_2 <= TABLE3[2][1];
+			merge_cnt_1 	<= TABLE3[1][1];
+			merge_cnt_2 	<= TABLE3[2][1];
 			merge_index_1 <= TABLE3[1][2];
 			merge_index_2 <= TABLE3[2][2];
 		end
 		insert_ini_4: begin
-			merge_cnt_1 <= TABLE4[1][1];
-			merge_cnt_2 <= TABLE4[2][1];
+			merge_cnt_1 	<= TABLE4[1][1];
+			merge_cnt_2 	<= TABLE4[2][1];
 			merge_index_1 <= TABLE4[1][2];
 			merge_index_2 <= TABLE4[2][2];
 		end
@@ -700,7 +715,6 @@ always@(posedge clk) begin
 end
 
 ///TABLE1-6
-//integer J,K,Q,W,E,R;//對應1-6
 
 always@(posedge clk) begin
 	if (reset) begin
@@ -861,6 +875,166 @@ always@(posedge clk) begin
 end
 
 
+/////////symbol1 split////////
+always@(posedge clk) begin
+	if(reset) begin
+		HC1 <= 8'd0;
+		M1  <= 8'd0;
+	end
+	else begin
+		case(cs)
+			split_1 : begin
+				if(TABLE5[2][2][0] == 1'd1) begin
+					HC1 <= {HC1[7:1],1'b0};
+					M1  <= {M1[7:1],1'b1};
+				end
+				else if(TABLE5[1][2][0] == 1'd1) begin
+					HC1 <= {HC1[7:1],1'b1};
+					M1  <= {M1[7:1],1'b1};
+				end
+			end
+
+			split_2 : begin
+				if(TABLE4[2][2][0] == 1'd1) begin
+					HC1 <= {HC1[7:1],1'b0};
+					M1  <= {M1[7:1],1'b1};
+				end
+				else if(TABLE4[1][2][0] == 1'd1) begin
+					HC1 <= {HC1[7:1],1'b1};
+					M1  <= {M1[7:1],1'b1};
+				end
+				else begin
+					HC1 <= HC1;
+					M1  <= M1;
+				end
+			end
+			split_3 : begin
+				if(TABLE3[2][2][0] == 1'd1) begin
+					HC1 <= {HC1[7:1],1'b0};
+					M1  <= {M1[7:1],1'b1};
+				end
+				else if(TABLE3[1][2][0] == 1'd1) begin
+					HC1 <= {HC1[7:1],1'b1};
+					M1  <= {M1[7:1],1'b1};
+				end
+				else begin
+					HC1 <= HC1;
+					M1  <= M1;
+				end
+			end
+			split_4 : begin
+				if(TABLE4[2][2][0] == 1'd1) begin
+					HC1 <= {HC1[7:1],1'b0};
+					M1  <= {M1[7:1],1'b1};
+				end
+				else if(TABLE4[1][2][0] == 1'd1) begin
+					HC1 <= {HC1[7:1],1'b1};
+					M1  <= {M1[7:1],1'b1};
+				end
+				else begin
+					HC1 <= HC1;
+					M1  <= M1;
+				end
+			end
+			split_5 : begin
+				if(TABLE5[2][2][0] == 1'd1) begin
+					HC1 <= {HC1[7:1],1'b0};
+					M1  <= {M1[7:1],1'b1};
+				end
+				else if(TABLE5[1][2][0] == 1'd1) begin
+					HC1 <= {HC1[7:1],1'b1};
+					M1  <= {M1[7:1],1'b1};
+				end
+				else begin
+					HC1 <= HC1;
+					M1  <= M1;
+				end
+			end
+		endcase
+	end
+
+end
+
+
+/////////symbol2 split////////
+always@(posedge clk) begin
+	if(reset) begin
+		HC2 <= 8'd0;
+		M2  <= 8'd0;
+	end
+	else begin
+		case(cs)
+			split_1 : begin
+				if(TABLE5[2][2][1] == 1'd1) begin
+					HC2 <= {HC2[7:1],1'b0};
+					M2  <= {M2[7:1],1'b1};
+				end
+				else if(TABLE5[1][2][1] == 1'd1) begin
+					HC2 <= {HC2[7:1],1'b1};
+					M2  <= {M2[7:1],1'b1};
+				end
+			end
+
+			split_2 : begin
+				if(TABLE4[2][2][1] == 1'd1) begin
+					HC2 <= {HC2[7:1],1'b0};
+					M2  <= {M2[7:1],1'b1};
+				end
+				else if(TABLE4[1][2][1] == 1'd1) begin
+					HC2 <= {HC2[7:1],1'b1};
+					M2  <= {M2[7:1],1'b1};
+				end
+				else begin
+					HC2 <= HC2;
+					M2  <= M2;
+				end
+			end
+			split_3 : begin
+				if(TABLE3[2][2][1] == 1'd1) begin
+					HC2 <= {HC2[7:1],1'b0};
+					M2  <= {M2[7:1],1'b1};
+				end
+				else if(TABLE3[1][2][1] == 1'd1) begin
+					HC2 <= {HC2[7:1],1'b1};
+					M2  <= {M2[7:1],1'b1};
+				end
+				else begin
+					HC2 <= HC2;
+					M2  <= M2;
+				end
+			end
+			split_4 : begin
+				if(TABLE4[2][2][1] == 1'd1) begin
+					HC2 <= {HC2[7:1],1'b0};
+					M2  <= {M2[7:1],1'b1};
+				end
+				else if(TABLE4[1][2][1] == 1'd1) begin
+					HC2 <= {HC2[7:1],1'b1};
+					M2  <= {M2[7:1],1'b1};
+				end
+				else begin
+					HC2 <= HC2;
+					M2  <= M2;
+				end
+			end
+			split_5 : begin
+				if(TABLE5[2][2][1] == 1'd1) begin
+					HC2 <= {HC2[7:1],1'b0};
+					M2  <= {M2[7:1],1'b1};
+				end
+				else if(TABLE5[1][2][1] == 1'd1) begin
+					HC2 <= {HC2[7:1],1'b1};
+					M2  <= {M2[7:1],1'b1};
+				end
+				else begin
+					HC2 <= HC2;
+					M2  <= M2;
+				end
+			end
+		endcase
+	end
+
+end
 
 endmodule
 
