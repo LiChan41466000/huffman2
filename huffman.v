@@ -6,10 +6,10 @@ input reset;
 input gray_valid;
 input [7:0] gray_data;
 output reg CNT_valid;	
-output  reg [7:0] CNT1, CNT2, CNT3, CNT4, CNT5, CNT6;
+output reg [7:0] CNT1, CNT2, CNT3, CNT4, CNT5, CNT6;
 output reg code_valid;
-output reg [7:0] HC1, HC2, HC3, HC4, HC5, HC6;
-output reg [7:0] M1, M2, M3, M4, M5, M6;
+output [7:0] HC1, HC2, HC3, HC4, HC5, HC6;
+output [7:0] M1, M2, M3, M4, M5, M6;
 //============================================
 parameter idle       	 = 5'd0;   // idle
 parameter rec        	 = 5'd1;   //reset 
@@ -33,12 +33,13 @@ parameter insert_ini_3   = 5'd18;  //
 parameter insert_3       = 5'd19;  //
 parameter insert_ini_4   = 5'd20;  //其實不需要這個狀態，只是方便程式可讀性以及方便共用combinational邏輯!
 parameter insert_4       = 5'd21;  //
-parameter split_1         = 5'd22;  //
-parameter split_2         = 5'd23;  //
-parameter split_3         = 5'd24;  //
-parameter split_4         = 5'd25;  //
-parameter split_4         = 5'd26;  //
-parameter done            = 5'd27;  // 
+parameter split_1        = 5'd22;  //
+parameter split_2        = 5'd23;  //
+parameter split_3        = 5'd24;  //
+parameter split_4        = 5'd25;  //
+parameter split_5        = 5'd26;  //
+parameter code_valid_OUT = 5'd27;  //
+parameter done           = 5'd28;  // 
 
 
 //============================================
@@ -46,10 +47,14 @@ reg [4:0] cs,ns;
 reg encoding_done,receive_done;
 reg [6:0] A1,A2,A3,A4,A5,A6 [6:0];
 reg [6:0] rec_count;
+wire ini_sort_3_finish,insert_3_finish,insert_1_finish,insert_2_finish;
 // =========================================== INDEX ==========================================
 	//  - FSM done
 	//  - CNT_valid
 	//  - CNT1~6
+	//  - code_valid
+    //  - sorting module 
+
 //============================================ INDEX ==========================================
 // FSM  done
 always @ (*) begin
@@ -140,7 +145,10 @@ always @ (*) begin
 		split_4:
 			ns = split_5;
 		split_5:
+			ns = code_valid_OUT;
+		code_valid_OUT:
 			ns = done;
+		
 		done :
 			ns = done;
 
@@ -257,12 +265,32 @@ always@(posedge clk) begin
 	end
 end
   
+//code valid///////////////
+always@(posedge clk) begin
+	if (reset) begin
+		code_valid <= 1'b0;
+	end
+	else if(cs == code_valid_OUT) begin
+		code_valid <= 1'b1;
+	end
+	else if(cs == done) begin
+		code_valid <= 1'b0;
+	end
+
+end
+
+//sorting module//////
+sorting ST0 (.cs(cs),.clk(clk),.reset(reset),.CNT1(CNT1), .CNT2(CNT2), .CNT3(CNT3), .CNT4(CNT4), .CNT5(CNT5), .CNT6(CNT6)
+, .ini_sort_3_finish(ini_sort_3_finish), .insert_1_finish(insert_1_finish), .insert_2_finish(insert_2_finish), .insert_3_finish(insert_3_finish)
+, .HC1(HC1), .HC2(HC2), .HC3(HC3), .HC4(HC4), .HC5(HC5), .HC6(HC6), .M1(M1), .M2(M2), .M3(M3), .M4(M4), .M5(M5), .M6(M6)
+);
+
   
 endmodule
 
 
 module sorting (cs,clk,reset, CNT1, CNT2, CNT3, CNT4, CNT5, CNT6, ini_sort_3_finish, insert_1_finish, insert_2_finish,insert_3_finish,
-	code_valid, HC1, HC2, HC3, HC4, HC5, HC6,M1, M2, M3, M4, M5, M6);
+	HC1, HC2, HC3, HC4, HC5, HC6, M1, M2, M3, M4, M5, M6);
 //process sort and merge algo in ini sort state
 //process insertion algo in the following state
 //using cs to control
@@ -272,7 +300,7 @@ input [4:0] cs;
 input [7:0] CNT1, CNT2, CNT3, CNT4, CNT5, CNT6;
 output reg ini_sort_3_finish;
 output reg insert_1_finish,insert_2_finish,insert_3_finish;
-output reg code_valid;
+//output reg code_valid;
 output reg [7:0] HC1, HC2, HC3, HC4, HC5, HC6;
 output reg [7:0] M1, M2, M3, M4, M5, M6;
 
@@ -348,7 +376,8 @@ parameter split_2        = 5'd23;  //
 parameter split_3        = 5'd24;  //
 parameter split_4        = 5'd25;  //
 parameter split_4        = 5'd26;  //
-parameter done           = 5'd27;  //  
+parameter code_valid_OUT = 5'd27;  //
+parameter done           = 5'd28;  // 
 
 
 parameter symbol1 		= 8'b00000001;
@@ -363,7 +392,7 @@ parameter symbol6 		= 8'b00100000;
 	//  - com_in1 & 2 com_index_1 & 2
 	//  - merge cnt1&2 merge idx 1& 2
 	//  - TABLE1-6
-	//  - split
+	//  - symbol split1-6
 	//  - 
 	//  - 
 //============================================ INDEX ==========================================
@@ -885,23 +914,23 @@ always@(posedge clk) begin
 		case(cs)
 			split_1 : begin
 				if(TABLE5[2][2][0] == 1'd1) begin
-					HC1 <= {HC1[7:1],1'b0};
-					M1  <= {M1[7:1],1'b1};
+					HC1 <= {HC1[6:0],1'b0};
+					M1  <= {M1[6:0],1'b1};
 				end
 				else if(TABLE5[1][2][0] == 1'd1) begin
-					HC1 <= {HC1[7:1],1'b1};
-					M1  <= {M1[7:1],1'b1};
+					HC1 <= {HC1[6:0],1'b1};
+					M1  <= {M1[6:0],1'b1};
 				end
 			end
 
 			split_2 : begin
 				if(TABLE4[2][2][0] == 1'd1) begin
-					HC1 <= {HC1[7:1],1'b0};
-					M1  <= {M1[7:1],1'b1};
+					HC1 <= {HC1[6:0],1'b0};
+					M1  <= {M1[6:0],1'b1};
 				end
 				else if(TABLE4[1][2][0] == 1'd1) begin
-					HC1 <= {HC1[7:1],1'b1};
-					M1  <= {M1[7:1],1'b1};
+					HC1 <= {HC1[6:0],1'b1};
+					M1  <= {M1[6:0],1'b1};
 				end
 				else begin
 					HC1 <= HC1;
@@ -910,12 +939,12 @@ always@(posedge clk) begin
 			end
 			split_3 : begin
 				if(TABLE3[2][2][0] == 1'd1) begin
-					HC1 <= {HC1[7:1],1'b0};
-					M1  <= {M1[7:1],1'b1};
+					HC1 <= {HC1[6:0],1'b0};
+					M1  <= {M1[6:0],1'b1};
 				end
 				else if(TABLE3[1][2][0] == 1'd1) begin
-					HC1 <= {HC1[7:1],1'b1};
-					M1  <= {M1[7:1],1'b1};
+					HC1 <= {HC1[6:0],1'b1};
+					M1  <= {M1[6:0],1'b1};
 				end
 				else begin
 					HC1 <= HC1;
@@ -924,12 +953,12 @@ always@(posedge clk) begin
 			end
 			split_4 : begin
 				if(TABLE4[2][2][0] == 1'd1) begin
-					HC1 <= {HC1[7:1],1'b0};
-					M1  <= {M1[7:1],1'b1};
+					HC1 <= {HC1[6:0],1'b0};
+					M1  <= {M1[6:0],1'b1};
 				end
 				else if(TABLE4[1][2][0] == 1'd1) begin
-					HC1 <= {HC1[7:1],1'b1};
-					M1  <= {M1[7:1],1'b1};
+					HC1 <= {HC1[6:0],1'b1};
+					M1  <= {M1[6:0],1'b1};
 				end
 				else begin
 					HC1 <= HC1;
@@ -938,12 +967,12 @@ always@(posedge clk) begin
 			end
 			split_5 : begin
 				if(TABLE5[2][2][0] == 1'd1) begin
-					HC1 <= {HC1[7:1],1'b0};
-					M1  <= {M1[7:1],1'b1};
+					HC1 <= {HC1[6:0],1'b0};
+					M1  <= {M1[6:0],1'b1};
 				end
 				else if(TABLE5[1][2][0] == 1'd1) begin
-					HC1 <= {HC1[7:1],1'b1};
-					M1  <= {M1[7:1],1'b1};
+					HC1 <= {HC1[6:0],1'b1};
+					M1  <= {M1[6:0],1'b1};
 				end
 				else begin
 					HC1 <= HC1;
@@ -966,23 +995,23 @@ always@(posedge clk) begin
 		case(cs)
 			split_1 : begin
 				if(TABLE5[2][2][1] == 1'd1) begin
-					HC2 <= {HC2[7:1],1'b0};
-					M2  <= {M2[7:1],1'b1};
+					HC2 <= {HC2[6:0],1'b0};
+					M2  <= {M2[6:0],1'b1};
 				end
 				else if(TABLE5[1][2][1] == 1'd1) begin
-					HC2 <= {HC2[7:1],1'b1};
-					M2  <= {M2[7:1],1'b1};
+					HC2 <= {HC2[6:0],1'b1};
+					M2  <= {M2[6:0],1'b1};
 				end
 			end
 
 			split_2 : begin
 				if(TABLE4[2][2][1] == 1'd1) begin
-					HC2 <= {HC2[7:1],1'b0};
-					M2  <= {M2[7:1],1'b1};
+					HC2 <= {HC2[6:0],1'b0};
+					M2  <= {M2[6:0],1'b1};
 				end
 				else if(TABLE4[1][2][1] == 1'd1) begin
-					HC2 <= {HC2[7:1],1'b1};
-					M2  <= {M2[7:1],1'b1};
+					HC2 <= {HC2[6:0],1'b1};
+					M2  <= {M2[6:0],1'b1};
 				end
 				else begin
 					HC2 <= HC2;
@@ -991,12 +1020,12 @@ always@(posedge clk) begin
 			end
 			split_3 : begin
 				if(TABLE3[2][2][1] == 1'd1) begin
-					HC2 <= {HC2[7:1],1'b0};
-					M2  <= {M2[7:1],1'b1};
+					HC2 <= {HC2[6:0],1'b0};
+					M2  <= {M2[6:0],1'b1};
 				end
 				else if(TABLE3[1][2][1] == 1'd1) begin
-					HC2 <= {HC2[7:1],1'b1};
-					M2  <= {M2[7:1],1'b1};
+					HC2 <= {HC2[6:0],1'b1};
+					M2  <= {M2[6:0],1'b1};
 				end
 				else begin
 					HC2 <= HC2;
@@ -1005,12 +1034,12 @@ always@(posedge clk) begin
 			end
 			split_4 : begin
 				if(TABLE4[2][2][1] == 1'd1) begin
-					HC2 <= {HC2[7:1],1'b0};
-					M2  <= {M2[7:1],1'b1};
+					HC2 <= {HC2[6:0],1'b0};
+					M2  <= {M2[6:0],1'b1};
 				end
 				else if(TABLE4[1][2][1] == 1'd1) begin
-					HC2 <= {HC2[7:1],1'b1};
-					M2  <= {M2[7:1],1'b1};
+					HC2 <= {HC2[6:0],1'b1};
+					M2  <= {M2[6:0],1'b1};
 				end
 				else begin
 					HC2 <= HC2;
@@ -1019,12 +1048,12 @@ always@(posedge clk) begin
 			end
 			split_5 : begin
 				if(TABLE5[2][2][1] == 1'd1) begin
-					HC2 <= {HC2[7:1],1'b0};
-					M2  <= {M2[7:1],1'b1};
+					HC2 <= {HC2[6:0],1'b0};
+					M2  <= {M2[6:0],1'b1};
 				end
 				else if(TABLE5[1][2][1] == 1'd1) begin
 					HC2 <= {HC2[7:1],1'b1};
-					M2  <= {M2[7:1],1'b1};
+					M2  <= {M2[6:0],1'b1};
 				end
 				else begin
 					HC2 <= HC2;
@@ -1033,8 +1062,330 @@ always@(posedge clk) begin
 			end
 		endcase
 	end
-
 end
+
+
+/////////symbol3 split////////
+always@(posedge clk) begin
+	if(reset) begin
+		HC3 <= 8'd0;
+		M3  <= 8'd0;
+	end
+	else begin
+		case(cs)
+			split_1 : begin
+				if(TABLE5[2][2][2] == 1'd1) begin
+					HC3 <= {HC3[6:0],1'b0};
+					M3  <= {M3[6:0],1'b1};
+				end
+				else if(TABLE5[1][2][2] == 1'd1) begin
+					HC3 <= {HC3[6:0],1'b1};
+					M3  <= {M3[6:0],1'b1};
+				end
+			end
+
+			split_2 : begin
+				if(TABLE4[2][2][2] == 1'd1) begin
+					HC3 <= {HC3[6:0],1'b0};
+					M3  <= {M3[6:0],1'b1};
+				end
+				else if(TABLE4[1][2][2] == 1'd1) begin
+					HC3 <= {HC3[6:0],1'b1};
+					M3  <= {M3[6:0],1'b1};
+				end
+				else begin
+					HC3 <= HC3;
+					M3  <= M3;
+				end
+			end
+			split_3 : begin
+				if(TABLE3[2][2][2] == 1'd1) begin
+					HC3 <= {HC3[6:0],1'b0};
+					M3  <= {M3[6:0],1'b1};
+				end
+				else if(TABLE3[1][2][2] == 1'd1) begin
+					HC3 <= {HC3[6:0],1'b1};
+					M3  <= {M3[6:0],1'b1};
+				end
+				else begin
+					HC3 <= HC3;
+					M3  <= M3;
+				end
+			end
+			split_4 : begin
+				if(TABLE4[2][2][2] == 1'd1) begin
+					HC3 <= {HC3[6:0],1'b0};
+					M3  <= {M3[6:0],1'b1};
+				end
+				else if(TABLE4[1][2][2] == 1'd1) begin
+					HC3 <= {HC3[6:0],1'b1};
+					M3  <= {M3[6:0],1'b1};
+				end
+				else begin
+					HC3 <= HC3;
+					M3  <= M3;
+				end
+			end
+			split_5 : begin
+				if(TABLE5[2][2][2] == 1'd1) begin
+					HC3 <= {HC3[6:0],1'b0};
+					M3  <= {M3[6:0],1'b1};
+				end
+				else if(TABLE5[1][2][2] == 1'd1) begin
+					HC3 <= {HC3[6:0],1'b1};
+					M3  <= {M3[6:0],1'b1};
+				end
+				else begin
+					HC3 <= HC3;
+					M3  <= M3;
+				end
+			end
+		endcase
+	end
+end
+
+
+/////////symbol4 split////////
+always@(posedge clk) begin
+	if(reset) begin
+		HC4 <= 8'd0;
+		M4  <= 8'd0;
+	end
+	else begin
+		case(cs)
+			split_1 : begin
+				if(TABLE5[2][2][3] == 1'd1) begin
+					HC4 <= {HC4[6:0],1'b0};
+					M4  <= {M4[6:0],1'b1};
+				end
+				else if(TABLE5[1][2][3] == 1'd1) begin
+					HC4 <= {HC4[6:0],1'b1};
+					M4  <= {M4[6:0],1'b1};
+				end
+			end
+
+			split_2 : begin
+				if(TABLE4[2][2][3] == 1'd1) begin
+					HC4 <= {HC4[6:0],1'b0};
+					M4  <= {M4[6:0],1'b1};
+				end
+				else if(TABLE4[1][2][3] == 1'd1) begin
+					HC4 <= {HC4[6:0],1'b1};
+					M4  <= {M4[6:0],1'b1};
+				end
+				else begin
+					HC4 <= HC4;
+					M4  <= M4;
+				end
+			end
+			split_3 : begin
+				if(TABLE3[2][2][3] == 1'd1) begin
+					HC4 <= {HC4[6:0],1'b0};
+					M4  <= {M4[6:0],1'b1};
+				end
+				else if(TABLE3[1][2][3] == 1'd1) begin
+					HC4 <= {HC4[6:0],1'b1};
+					M4  <= {M4[6:0],1'b1};
+				end
+				else begin
+					HC4 <= HC4;
+					M4  <= M4;
+				end
+			end
+			split_4 : begin
+				if(TABLE4[2][2][3] == 1'd1) begin
+					HC4 <= {HC4[6:0],1'b0};
+					M4  <= {M4[6:0],1'b1};
+				end
+				else if(TABLE4[1][2][3] == 1'd1) begin
+					HC4 <= {HC4[6:0],1'b1};
+					M4  <= {M4[6:0],1'b1};
+				end
+				else begin
+					HC4 <= HC4;
+					M4  <= M4;
+				end
+			end
+			split_5 : begin
+				if(TABLE5[2][2][3] == 1'd1) begin
+					HC4 <= {HC4[6:0],1'b0};
+					M4  <= {M4[6:0],1'b1};
+				end
+				else if(TABLE5[1][2][3] == 1'd1) begin
+					HC4 <= {HC4[6:0],1'b1};
+					M4  <= {M4[6:0],1'b1};
+				end
+				else begin
+					HC4 <= HC4;
+					M4  <= M4;
+				end
+			end
+		endcase
+	end
+end
+
+/////////symbol5 split////////
+always@(posedge clk) begin
+	if(reset) begin
+		HC5 <= 8'd0;
+		M5  <= 8'd0;
+	end
+	else begin
+		case(cs)
+			split_1 : begin
+				if(TABLE5[2][2][4] == 1'd1) begin
+					HC5 <= {HC5[6:0],1'b0};
+					M5  <= {M5[6:0],1'b1};
+				end
+				else if(TABLE5[1][2][4] == 1'd1) begin
+					HC5 <= {HC5[6:0],1'b1};
+					M5  <= {M5[6:0],1'b1};
+				end
+			end
+
+			split_2 : begin
+				if(TABLE4[2][2][4] == 1'd1) begin
+					HC5 <= {HC5[6:0],1'b0};
+					M5  <= {M5[6:0],1'b1};
+				end
+				else if(TABLE4[1][2][4] == 1'd1) begin
+					HC5 <= {HC5[6:0],1'b1};
+					M5  <= {M5[6:0],1'b1};
+				end
+				else begin
+					HC5 <= HC5;
+					M5  <= M5;
+				end
+			end
+			split_3 : begin
+				if(TABLE3[2][2][4] == 1'd1) begin
+					HC5 <= {HC5[6:0],1'b0};
+					M5  <= {M5[6:0],1'b1};
+				end
+				else if(TABLE3[1][2][4] == 1'd1) begin
+					HC5 <= {HC5[6:0],1'b1};
+					M5  <= {M5[6:0],1'b1};
+				end
+				else begin
+					HC5 <= HC5;
+					M5  <= M5;
+				end
+			end
+			split_4 : begin
+				if(TABLE4[2][2][4] == 1'd1) begin
+					HC5 <= {HC5[6:0],1'b0};
+					M5  <= {M5[6:0],1'b1};
+				end
+				else if(TABLE4[1][2][4] == 1'd1) begin
+					HC5 <= {HC5[6:0],1'b1};
+					M5  <= {M5[6:0],1'b1};
+				end
+				else begin
+					HC5 <= HC5;
+					M5  <= M5;
+				end
+			end
+			split_5 : begin
+				if(TABLE5[2][2][4] == 1'd1) begin
+					HC5 <= {HC5[6:0],1'b0};
+					M5  <= {M5[6:0],1'b1};
+				end
+				else if(TABLE5[1][2][4] == 1'd1) begin
+					HC5 <= {HC5[6:0],1'b1};
+					M5  <= {M5[6:0],1'b1};
+				end
+				else begin
+					HC5 <= HC5;
+					M5  <= M5;
+				end
+			end
+		endcase
+	end
+end
+
+
+
+/////////symbol6 split////////
+always@(posedge clk) begin
+	if(reset) begin
+		HC6 <= 8'd0;
+		M6  <= 8'd0;
+	end
+	else begin
+		case(cs)
+			split_1 : begin
+				if(TABLE5[2][2][5] == 1'd1) begin
+					HC6 <= {HC6[6:0],1'b0};
+					M6  <= {M6[6:0],1'b1};
+				end
+				else if(TABLE5[1][2][5] == 1'd1) begin
+					HC6 <= {HC6[6:0],1'b1};
+					M6  <= {M6[6:0],1'b1};
+				end
+			end
+
+			split_2 : begin
+				if(TABLE4[2][2][5] == 1'd1) begin
+					HC6 <= {HC6[6:0],1'b0};
+					M6  <= {M6[6:0],1'b1};
+				end
+				else if(TABLE4[1][2][5] == 1'd1) begin
+					HC6 <= {HC6[6:0],1'b1};
+					M6  <= {M6[6:0],1'b1};
+				end
+				else begin
+					HC6 <= HC6;
+					M6  <= M6;
+				end
+			end
+			split_3 : begin
+				if(TABLE3[2][2][5] == 1'd1) begin
+					HC6 <= {HC6[6:0],1'b0};
+					M6  <= {M6[6:0],1'b1};
+				end
+				else if(TABLE3[1][2][5] == 1'd1) begin
+					HC6 <= {HC6[6:0],1'b1};
+					M6  <= {M6[6:0],1'b1};
+				end
+				else begin
+					HC6 <= HC6;
+					M6  <= M6;
+				end
+			end
+			split_4 : begin
+				if(TABLE4[2][2][5] == 1'd1) begin
+					HC6 <= {HC6[6:0],1'b0};
+					M6  <= {M6[6:0],1'b1};
+				end
+				else if(TABLE4[1][2][5] == 1'd1) begin
+					HC6 <= {HC6[6:0],1'b1};
+					M6  <= {M6[6:0],1'b1};
+				end
+				else begin
+					HC6 <= HC6;
+					M6  <= M6;
+				end
+			end
+			split_5 : begin
+				if(TABLE5[2][2][5] == 1'd1) begin
+					HC6 <= {HC6[6:0],1'b0};
+					M6  <= {M6[6:0],1'b1};
+				end
+				else if(TABLE5[1][2][5] == 1'd1) begin
+					HC6 <= {HC6[6:0],1'b1};
+					M6  <= {M6[6:0],1'b1};
+				end
+				else begin
+					HC6 <= HC6;
+					M6  <= M6;
+				end
+			end
+		endcase
+	end
+end
+
+
+
 
 endmodule
 
