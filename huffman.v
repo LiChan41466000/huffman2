@@ -1206,7 +1206,7 @@ always@(posedge clk) begin
 					M2  <= {M2[6:0],1'b1};
 				end
 				else if(TABLE1[1][2][1] == 1'd1) begin
-					HC2 <= {HC2[7:1],1'b1};
+					HC2 <= {HC2[6:0],1'b1};
 					M2  <= {M2[6:0],1'b1};
 				end
 				else begin
