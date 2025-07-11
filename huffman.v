@@ -478,6 +478,7 @@ case (cs)
 		com_in2 	<= temp [4][1];
 		com_index_2 <= temp [4][2];
 	end
+
 	default : begin ///////   insert   階段全都是比較temp[1] & [2]
 		com_in1 	<= temp [1][1];
 		com_index_1 <= temp [1][2];
@@ -968,8 +969,15 @@ always@(posedge clk) begin
 						TABLE2[5][2] <= temp[1][2];
 					end
 					else begin
-						TABLE2[5][1] <= which_one_have_be_put;
-						TABLE2[5][2] <= which_index_have_be_put;
+						if (equal_signal_1)begin			////////////////////////
+							TABLE2[5][1] <= merge_cnt;		//MODIFY HERE !!!!!!!!//
+							TABLE2[5][2] <= merge_index;	////////////////////////
+						end	
+
+						else begin
+							TABLE2[5][1] <= which_one_have_be_put;
+							TABLE2[5][2] <= which_index_have_be_put;
+						end
 					end
 					TABLE2[4][1] <= TABLE2[5][1];
 					TABLE2[4][2] <= TABLE2[5][2];
@@ -1004,8 +1012,15 @@ always@(posedge clk) begin
 						TABLE3[4][2] <= temp[1][2];
 					end
 					else begin
-						TABLE3[4][1] <= which_one_have_be_put;
-						TABLE3[4][2] <= which_index_have_be_put;
+						if(equal_signal_1)begin				////////////////////////
+							TABLE3[4][1] <= merge_cnt;		//MODIFY HERE !!!!!!!!//
+							TABLE3[4][2] <= merge_index;   ////////////////////////
+						end
+
+						else begin
+							TABLE3[4][1] <= which_one_have_be_put;
+							TABLE3[4][2] <= which_index_have_be_put;
+						end
 					end
 					TABLE3[3][1] <= TABLE3[4][1];
 					TABLE3[3][2] <= TABLE3[4][2];
@@ -1026,6 +1041,7 @@ always@(posedge clk) begin
 					TABLE4[1][2] <= TABLE4[1][2];
 				end
 
+
 				else begin
 					if(com1_is_zero_1 && !com2_is_zero_1)begin
 						TABLE4[3][1] <= temp[2][1];
@@ -1036,8 +1052,14 @@ always@(posedge clk) begin
 						TABLE4[3][2] <= temp[1][2];
 					end
 					else begin
+						if(equal_signal_1)begin				////////////////////////
+							TABLE4[3][1] <= merge_cnt;		//MODIFY HERE !!!!!!!!//
+							TABLE4[3][2] <= merge_index;	////////////////////////
+						end
+						else begin
 						TABLE4[3][1] <= which_one_have_be_put;
 						TABLE4[3][2] <= which_index_have_be_put;
+						end
 					end
 					//TABLE4[3][1] <= which_one_have_be_put;
 					//TABLE4[3][2] <= which_index_have_be_put;
