@@ -352,7 +352,7 @@ assign the_inverse_one_have_be_put = (equal_signal_1)? ((com_index)?com_in1:com_
 assign the_inverse_index_have_be_put = (equal_signal_1)? ((com_index)?com_index_1:com_index_2) :((com_out_1)?com_index_2:com_index_1);
 
 assign merge_cnt = merge_cnt_1 + merge_cnt_2;
-assign merge_index = merge_index_1 + merge_index_2;
+assign merge_index = merge_index_1 | merge_index_2;
 
 
 //============================================
