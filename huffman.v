@@ -335,7 +335,7 @@ reg [7:0] com_index_2,com_index_1;
 //com_set_1////
 assign com_out_1 = (com_in1 < com_in2)? 1:0;
 assign equal_signal_1 = (com_in1 == com_in2)?1:0;
-assign com_index = (com_index_1 < com_index_2)?1:0;//機率一樣時，大的放下面
+assign com_index = (com_index_1[5:0] < com_index_2[5:0])?1:0;//機率一樣時，大的放下面
 assign com1_is_zero_1 = !(|com_index_1);//1代表全0,0代表有一
 assign com2_is_zero_1 = !(|com_index_2);//1代表全0,0代表有一，用index比較是怕測資有任一symbol都沒有出現
 
@@ -1560,46 +1560,46 @@ always@(posedge clk) begin
 	end
 end
 
-wire [7:0] T5_2,T5_1,  T4_3,T4_2,T4_1, T3_4,T3_3,T3_2,T3_1, T2_5,T2_4,T2_3,T2_2,T2_1, T1_6,T1_5,T1_4,T1_3,T1_2,T1_1;
-wire [7:0] temp_1,temp_2,temp_3,temp_4,temp_5,temp_6;
-
-assign T5_2 = TABLE5[2][2];
-assign T5_1 = TABLE5[1][2];
-
-
-assign T4_3 = TABLE4[3][2];
-assign T4_2 = TABLE4[2][2];
-assign T4_1 = TABLE4[1][2];
-
-
-assign T3_4 = TABLE3[4][2];
-assign T3_3 = TABLE3[3][2];
-assign T3_2 = TABLE3[2][2];
-assign T3_1 = TABLE3[1][2];
-
-
-
-assign T2_5 = TABLE2[5][2];
-assign T2_4 = TABLE2[4][2];
-assign T2_3 = TABLE2[3][2];
-assign T2_2 = TABLE2[2][2];
-assign T2_1 = TABLE2[1][2];
-
-
-
-assign T1_6 = TABLE1[6][2];
-assign T1_5 = TABLE1[5][2];
-assign T1_4 = TABLE1[4][2];
-assign T1_3 = TABLE1[3][2];
-assign T1_2 = TABLE1[2][2];
-assign T1_1 = TABLE1[1][2];
-
-assign temp_6 = temp[6][2];
-assign temp_5 = temp[5][2];
-assign temp_4 = temp[4][2];
-assign temp_3 = temp[3][2];
-assign temp_2 = temp[2][2];
-assign temp_1 = temp[1][2];
+//wire [7:0] T5_2,T5_1,  T4_3,T4_2,T4_1, T3_4,T3_3,T3_2,T3_1, T2_5,T2_4,T2_3,T2_2,T2_1, T1_6,T1_5,T1_4,T1_3,T1_2,T1_1;
+//wire [7:0] temp_1,temp_2,temp_3,temp_4,temp_5,temp_6;
+//
+//assign T5_2 = TABLE5[2][2];
+//assign T5_1 = TABLE5[1][2];
+//
+//
+//assign T4_3 = TABLE4[3][2];
+//assign T4_2 = TABLE4[2][2];
+//assign T4_1 = TABLE4[1][2];
+//
+//
+//assign T3_4 = TABLE3[4][2];
+//assign T3_3 = TABLE3[3][2];
+//assign T3_2 = TABLE3[2][2];
+//assign T3_1 = TABLE3[1][2];
+//
+//
+//
+//assign T2_5 = TABLE2[5][2];
+//assign T2_4 = TABLE2[4][2];
+//assign T2_3 = TABLE2[3][2];
+//assign T2_2 = TABLE2[2][2];
+//assign T2_1 = TABLE2[1][2];
+//
+//
+//
+//assign T1_6 = TABLE1[6][2];
+//assign T1_5 = TABLE1[5][2];
+//assign T1_4 = TABLE1[4][2];
+//assign T1_3 = TABLE1[3][2];
+//assign T1_2 = TABLE1[2][2];
+//assign T1_1 = TABLE1[1][2];
+//
+//assign temp_6 = temp[6][2];
+//assign temp_5 = temp[5][2];
+//assign temp_4 = temp[4][2];
+//assign temp_3 = temp[3][2];
+//assign temp_2 = temp[2][2];
+//assign temp_1 = temp[1][2];
 
 endmodule
 
