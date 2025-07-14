@@ -194,9 +194,6 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd1) begin
 		CNT1 <= CNT1+8'd1;
 	end
-	//else begin
-	//	CNT1 <= CNT1;
-	//end
 end
   
  //=======================================
@@ -208,9 +205,6 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd2) begin
 		CNT2 <= CNT2+8'd1;
 	end
-	//else begin
-	//	CNT2 <= CNT2;
-	//end
 end
  
 //=======================================
@@ -222,9 +216,6 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd3) begin
 		CNT3 <= CNT3+8'd1;
 	end
-	//else begin
-	//	CNT3 <= CNT3;
-	//end
 end
 
 //=======================================
@@ -236,9 +227,6 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd4) begin
 		CNT4 <= CNT4+8'd1;
 	end
-	//else begin
-	//	CNT4 <= CNT4;
-	//end
 end
 
 //=======================================
@@ -250,9 +238,6 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd5) begin
 		CNT5 <= CNT5 + 8'd1;
 	end
-	//else begin
-	//	CNT5 <= CNT5;
-	//end
 end
   
 //=======================================
@@ -264,9 +249,6 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd6) begin
 		CNT6 <= CNT6+8'd1;
 	end
-	//else begin
-	//	CNT6 <= CNT6;
-	//end
 end
   
 //code valid///////////////
@@ -598,26 +580,11 @@ always@(posedge clk) begin
 			temp[i][1] <= 7'd0;
 			temp[i][2] <= 7'd0;
 		end
-//		ini_sort_3_finish <= 1'd0;
-//		insert_1_finish   <= 1'd0;
-//		insert_2_finish   <= 1'd0;
-//		insert_3_finish   <= 1'd0;
 	end
 
 	else begin
 
 		if(cs == insert_1 || cs == insert_2 || cs == insert_3 || cs == insert_4) begin
-//			if(com1_is_zero_1 && com2_is_zero_1) begin
-//				case(cs)
-//					insert_1 :
-//						insert_1_finish <= 1'd1;
-//					insert_2 :
-//						insert_2_finish <= 1'd1;
-//					insert_3 :
-//						insert_3_finish <= 1'd1;
-//				endcase
-//			end
-//			else 
 			if(com1_is_zero_1 && !com2_is_zero_1) begin //代表合併項已經被放入table，temp6:2直接右移，temp[2]要放進tanl2
 				temp[6][1] <= 7'd0;
 				temp[6][2] <= 7'd0;
@@ -737,10 +704,6 @@ always@(posedge clk) begin
 				endcase
 			end
 			ini_sort_3_4 : begin
-//				if(!(|temp[1][2]) || !(|temp[4][2])) begin //先判斷是否兩組比較暫存是否有一組全0,若有拉起結束訊號
-//					ini_sort_3_finish <=1'd1;
-//				end
-///				else begin
 					case(which_reg_should_be_replaced)	
 						1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
 							temp[3][1] <= 7'd0;
@@ -761,7 +724,6 @@ always@(posedge clk) begin
 					endcase
 
 				end
-//			end
 
 			insert_ini_1 : begin
 				temp[1][1] <= merge_cnt;
@@ -1061,8 +1023,6 @@ always@(posedge clk) begin
 						TABLE4[3][2] <= which_index_have_be_put;
 						end
 					end
-					//TABLE4[3][1] <= which_one_have_be_put;
-					//TABLE4[3][2] <= which_index_have_be_put;
 					TABLE4[2][1] <= TABLE4[3][1];
 					TABLE4[2][2] <= TABLE4[3][2];
 					TABLE4[1][1] <= TABLE4[2][1];
@@ -1108,10 +1068,6 @@ always@(posedge clk) begin
 					HC1 <= {HC1[6:0],1'b1};
 					M1  <= {M1[6:0],1'b1};
 				end
-				//else begin
-				//	HC1 <= HC1;
-				//	M1  <= M1;
-				//end
 			end
 			split_3 : begin
 				if(TABLE3[2][2][0] == 1'd1) begin
@@ -1122,10 +1078,6 @@ always@(posedge clk) begin
 					HC1 <= {HC1[6:0],1'b1};
 					M1  <= {M1[6:0],1'b1};
 				end
-				//else begin
-				//	HC1 <= HC1;
-				//	M1  <= M1;
-				//end
 			end
 			split_4 : begin
 				if(TABLE2[2][2][0] == 1'd1) begin
@@ -1136,10 +1088,6 @@ always@(posedge clk) begin
 					HC1 <= {HC1[6:0],1'b1};
 					M1  <= {M1[6:0],1'b1};
 				end
-				//else begin
-				//	HC1 <= HC1;
-				//	M1  <= M1;
-				//end
 			end
 			split_5 : begin
 				if(TABLE1[2][2][0] == 1'd1) begin
@@ -1150,10 +1098,6 @@ always@(posedge clk) begin
 					HC1 <= {HC1[6:0],1'b1};
 					M1  <= {M1[6:0],1'b1};
 				end
-				//else begin
-				//	HC1 <= HC1;
-				//	M1  <= M1;
-				//end
 			end
 		endcase
 	end
@@ -1189,10 +1133,6 @@ always@(posedge clk) begin
 					HC2 <= {HC2[6:0],1'b1};
 					M2  <= {M2[6:0],1'b1};
 				end
-				//else begin
-				//	HC2 <= HC2;
-				//	M2  <= M2;
-				//end
 			end
 			split_3 : begin
 				if(TABLE3[2][2][1] == 1'd1) begin
@@ -1203,10 +1143,6 @@ always@(posedge clk) begin
 					HC2 <= {HC2[6:0],1'b1};
 					M2  <= {M2[6:0],1'b1};
 				end
-				//else begin
-				//	HC2 <= HC2;
-				//	M2  <= M2;
-				//end
 			end
 			split_4 : begin
 				if(TABLE2[2][2][1] == 1'd1) begin
@@ -1217,10 +1153,6 @@ always@(posedge clk) begin
 					HC2 <= {HC2[6:0],1'b1};
 					M2  <= {M2[6:0],1'b1};
 				end
-				//else begin
-				//	HC2 <= HC2;
-				//	M2  <= M2;
-				//end
 			end
 			split_5 : begin
 				if(TABLE1[2][2][1] == 1'd1) begin
@@ -1231,10 +1163,6 @@ always@(posedge clk) begin
 					HC2 <= {HC2[6:0],1'b1};
 					M2  <= {M2[6:0],1'b1};
 				end
-				//else begin
-				//	HC2 <= HC2;
-				//	M2  <= M2;
-				//end
 			end
 		endcase
 	end
@@ -1269,10 +1197,6 @@ always@(posedge clk) begin
 					HC3 <= {HC3[6:0],1'b1};
 					M3  <= {M3[6:0],1'b1};
 				end
-				//else begin
-				//	HC3 <= HC3;
-				//	M3  <= M3;
-				//end
 			end
 			split_3 : begin
 				if(TABLE3[2][2][2] == 1'd1) begin
@@ -1283,10 +1207,6 @@ always@(posedge clk) begin
 					HC3 <= {HC3[6:0],1'b1};
 					M3  <= {M3[6:0],1'b1};
 				end
-				//else begin
-				//	HC3 <= HC3;
-				//	M3  <= M3;
-				//end
 			end
 			split_4 : begin
 				if(TABLE2[2][2][2] == 1'd1) begin
@@ -1297,10 +1217,6 @@ always@(posedge clk) begin
 					HC3 <= {HC3[6:0],1'b1};
 					M3  <= {M3[6:0],1'b1};
 				end
-				//else begin
-				//	HC3 <= HC3;
-				//	M3  <= M3;
-				//end
 			end
 			split_5 : begin
 				if(TABLE1[2][2][2] == 1'd1) begin
@@ -1311,10 +1227,6 @@ always@(posedge clk) begin
 					HC3 <= {HC3[6:0],1'b1};
 					M3  <= {M3[6:0],1'b1};
 				end
-				//else begin
-				//	HC3 <= HC3;
-				//	M3  <= M3;
-				//end
 			end
 		endcase
 	end
@@ -1349,10 +1261,6 @@ always@(posedge clk) begin
 					HC4 <= {HC4[6:0],1'b1};
 					M4  <= {M4[6:0],1'b1};
 				end
-				//else begin
-				//	HC4 <= HC4;
-				//	M4  <= M4;
-				//end
 			end
 			split_3 : begin
 				if(TABLE3[2][2][3] == 1'd1) begin
@@ -1363,10 +1271,6 @@ always@(posedge clk) begin
 					HC4 <= {HC4[6:0],1'b1};
 					M4  <= {M4[6:0],1'b1};
 				end
-				//else begin
-				//	HC4 <= HC4;
-				//	M4  <= M4;
-				//end
 			end
 			split_4 : begin
 				if(TABLE2[2][2][3] == 1'd1) begin
@@ -1377,10 +1281,6 @@ always@(posedge clk) begin
 					HC4 <= {HC4[6:0],1'b1};
 					M4  <= {M4[6:0],1'b1};
 				end
-				//else begin
-				//	HC4 <= HC4;
-				//	M4  <= M4;
-				//end
 			end
 			split_5 : begin
 				if(TABLE1[2][2][3] == 1'd1) begin
@@ -1391,10 +1291,6 @@ always@(posedge clk) begin
 					HC4 <= {HC4[6:0],1'b1};
 					M4  <= {M4[6:0],1'b1};
 				end
-				//else begin
-				//	HC4 <= HC4;
-				//	M4  <= M4;
-				//end
 			end
 		endcase
 	end
@@ -1428,10 +1324,6 @@ always@(posedge clk) begin
 					HC5 <= {HC5[6:0],1'b1};
 					M5  <= {M5[6:0],1'b1};
 				end
-				//else begin
-				//	HC5 <= HC5;
-				//	M5  <= M5;
-				//end
 			end
 			split_3 : begin
 				if(TABLE3[2][2][4] == 1'd1) begin
@@ -1442,10 +1334,6 @@ always@(posedge clk) begin
 					HC5 <= {HC5[6:0],1'b1};
 					M5  <= {M5[6:0],1'b1};
 				end
-				//else begin
-				//	HC5 <= HC5;
-				//	M5  <= M5;
-				//end
 			end
 			split_4 : begin
 				if(TABLE2[2][2][4] == 1'd1) begin
@@ -1456,10 +1344,6 @@ always@(posedge clk) begin
 					HC5 <= {HC5[6:0],1'b1};
 					M5  <= {M5[6:0],1'b1};
 				end
-				//else begin
-				//	HC5 <= HC5;
-				//	M5  <= M5;
-				//end
 			end
 			split_5 : begin
 				if(TABLE1[2][2][4] == 1'd1) begin
@@ -1470,10 +1354,6 @@ always@(posedge clk) begin
 					HC5 <= {HC5[6:0],1'b1};
 					M5  <= {M5[6:0],1'b1};
 				end
-				//else begin
-				//	HC5 <= HC5;
-				//	M5  <= M5;
-				//end
 			end
 		endcase
 	end
@@ -1509,10 +1389,6 @@ always@(posedge clk) begin
 					HC6 <= {HC6[6:0],1'b1};
 					M6  <= {M6[6:0],1'b1};
 				end
-				//else begin
-				//	HC6 <= HC6;
-				//	M6  <= M6;
-				//end
 			end
 			split_3 : begin
 				if(TABLE3[2][2][5] == 1'd1) begin
@@ -1523,10 +1399,6 @@ always@(posedge clk) begin
 					HC6 <= {HC6[6:0],1'b1};
 					M6  <= {M6[6:0],1'b1};
 				end
-				//else begin
-				//	HC6 <= HC6;
-				//	M6  <= M6;
-				//end
 			end
 			split_4 : begin
 				if(TABLE2[2][2][5] == 1'd1) begin
@@ -1537,10 +1409,6 @@ always@(posedge clk) begin
 					HC6 <= {HC6[6:0],1'b1};
 					M6  <= {M6[6:0],1'b1};
 				end
-				//else begin
-				//	HC6 <= HC6;
-				//	M6  <= M6;
-				//end
 			end
 			split_5 : begin
 				if(TABLE1[2][2][5] == 1'd1) begin
@@ -1551,10 +1419,6 @@ always@(posedge clk) begin
 					HC6 <= {HC6[6:0],1'b1};
 					M6  <= {M6[6:0],1'b1};
 				end
-				//else begin
-				//	HC6 <= HC6;
-				//	M6  <= M6;
-				//end
 			end
 		endcase
 	end
