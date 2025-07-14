@@ -50,9 +50,9 @@ parameter idle6           = 5'd34;  // 								    //
 parameter idle7           = 5'd35;  //////////////////////////////////////
 //============================================
 reg [4:0] cs,ns;
-reg encoding_done,receive_done;
-reg [6:0] A1,A2,A3,A4,A5,A6 [6:0];
-reg [6:0] rec_count;
+//reg encoding_done,receive_done;
+//reg [6:0] A1,A2,A3,A4,A5,A6 [6:0];
+//reg [6:0] rec_count;
 wire ini_sort_3_finish,insert_3_finish,insert_1_finish,insert_2_finish;
 // =========================================== INDEX ==========================================
 	//  - FSM done
@@ -505,7 +505,23 @@ always@(*) begin
 			merge_index_1 <= TABLE1[1][2];
 			merge_index_2 <= TABLE1[2][2];
 		end
+
+		insert_1 : begin
+			merge_cnt_1 	<= TABLE1[1][1];
+			merge_cnt_2 	<= TABLE1[2][1];
+			merge_index_1 <= TABLE1[1][2];
+			merge_index_2 <= TABLE1[2][2];
+		end
+
+
 		insert_ini_2: begin
+			merge_cnt_1 	<= TABLE2[1][1];
+			merge_cnt_2 	<= TABLE2[2][1];
+			merge_index_1 <= TABLE2[1][2];
+			merge_index_2 <= TABLE2[2][2];
+		end
+
+		insert_2 : begin
 			merge_cnt_1 	<= TABLE2[1][1];
 			merge_cnt_2 	<= TABLE2[2][1];
 			merge_index_1 <= TABLE2[1][2];
@@ -517,12 +533,33 @@ always@(*) begin
 			merge_index_1 <= TABLE3[1][2];
 			merge_index_2 <= TABLE3[2][2];
 		end
+
+		insert_3 : begin
+			merge_cnt_1 	<= TABLE3[1][1];
+			merge_cnt_2 	<= TABLE3[2][1];
+			merge_index_1 <= TABLE3[1][2];
+			merge_index_2 <= TABLE3[2][2];
+		end
 		insert_ini_4: begin
 			merge_cnt_1 	<= TABLE4[1][1];
 			merge_cnt_2 	<= TABLE4[2][1];
 			merge_index_1 <= TABLE4[1][2];
 			merge_index_2 <= TABLE4[2][2];
 		end
+
+		insert_4 : begin
+			merge_cnt_1 	<= TABLE4[1][1];
+			merge_cnt_2 	<= TABLE4[2][1];
+			merge_index_1 <= TABLE4[1][2];
+			merge_index_2 <= TABLE4[2][2];
+		end
+		default : begin
+			merge_cnt_1 	<= TABLE1[1][1];
+			merge_cnt_2 	<= TABLE1[2][1];
+			merge_index_1 <= TABLE1[1][2];
+			merge_index_2 <= TABLE1[2][2];
+		end
+
 
 	endcase
 end
@@ -1451,6 +1488,7 @@ always@(posedge clk) begin
 	end
 end
 
+///////////////////check waveform/////////////////////////////////////////////////////////////////////////////////////
 //wire [7:0] T5_2,T5_1,  T4_3,T4_2,T4_1, T3_4,T3_3,T3_2,T3_1, T2_5,T2_4,T2_3,T2_2,T2_1, T1_6,T1_5,T1_4,T1_3,T1_2,T1_1;
 //wire [7:0] temp_1,temp_2,temp_3,temp_4,temp_5,temp_6;
 //
