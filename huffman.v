@@ -38,10 +38,16 @@ parameter split_2        = 5'd23;  //
 parameter split_3        = 5'd24;  //
 parameter split_4        = 5'd25;  //
 parameter split_5        = 5'd26;  //
-parameter code_valid_OUT = 5'd27;  //
-parameter done           = 5'd28;  // 
+parameter code_valid_OUT = 5'd27;  //結束狀態
 
-
+parameter done            = 5'd28;   ///////////////////////////////////// 
+parameter idle1           = 5'd29;  //  							    //
+parameter idle2           = 5'd30;  // 								    //
+parameter idle3           = 5'd31;  // 								    //
+parameter idle4           = 5'd32;  // 不會進此狀態，只是狀態寫滿面積比較小//
+parameter idle5           = 5'd33;  // 								    //
+parameter idle6           = 5'd34;  // 								    //
+parameter idle7           = 5'd35;  //////////////////////////////////////
 //============================================
 reg [4:0] cs,ns;
 reg encoding_done,receive_done;
@@ -153,12 +159,32 @@ always @ (*) begin
 		code_valid_OUT:
 			ns = code_valid_OUT;
 		
-		//done :
-		//	ns = done;
+		done :
+			ns = done;
 
-		default : begin
-			ns = idle;
-		end
+		idle1 :
+			ns = idle1;
+
+		idle2 :
+			ns = idle2;
+
+		idle3 :
+			ns = idle3;
+
+		idle4 :
+			ns = idle4;
+
+		idle5 :
+			ns = idle5;
+		idle6 :
+			ns = idle6;
+
+		idle7 :
+			ns = idle7;
+
+		//default : begin
+		//	ns = idle;
+		//end				//寫滿狀態面積小
 	endcase
 end
 
