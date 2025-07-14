@@ -582,7 +582,7 @@ end
 //		insert_3_finish
 always@(*) begin
 	case(cs)
-		insert_3 : begin
+		insert_3 :  begin
 			if(com1_is_zero_1 && com2_is_zero_1) begin
 				insert_3_finish <= 1'd1;
 			end
