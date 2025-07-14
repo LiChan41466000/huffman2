@@ -151,10 +151,10 @@ always @ (*) begin
 		split_5:
 			ns = code_valid_OUT;
 		code_valid_OUT:
-			ns = done;
+			ns = code_valid_OUT;
 		
-		done :
-			ns = done;
+		//done :
+		//	ns = done;
 
 		default : begin
 			ns = idle;
@@ -256,12 +256,12 @@ always@(posedge clk) begin
 	if (reset) begin
 		code_valid <= 1'b0;
 	end
-	else if(cs == code_valid_OUT) begin
+	else if(cs == split_5) begin
 		code_valid <= 1'b1;
 	end
-	else if(cs == done) begin
-		code_valid <= 1'b0;
-	end
+	//else if(cs == code_valid_OUT) begin
+	//	code_valid <= 1'b0;
+	//end
 
 end
 
