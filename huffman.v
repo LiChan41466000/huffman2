@@ -313,25 +313,25 @@ wire com_out_1;
 wire equal_signal_1;
 wire com1_is_zero_1;
 wire com2_is_zero_1;
-wire [7:0] merge_cnt;
-wire [7:0] merge_index;
-wire [7:0] which_one_have_be_put, which_index_have_be_put, the_inverse_one_have_be_put, the_inverse_index_have_be_put;
+wire [6:0] merge_cnt;
+wire [6:0] merge_index;
+wire [6:0] which_one_have_be_put, which_index_have_be_put, the_inverse_one_have_be_put, the_inverse_index_have_be_put;
 wire which_reg_should_be_replaced;
 
 
 ////////注意每個index也是開到8bit是可以再優化，但因為寫法方便先暫用陣列
-reg [7:0] com_in1,com_in2;
+reg [6:0] com_in1,com_in2;
 //reg [5:0] com_in4,com_in5;
-reg [7:0] TABLE1 [6:1][2:1];//table for ini sort;[6:1]means symbol order 6-1 from cnt big to small;[2:1]的[2]代表index;[1]代表總計的cnt
-reg [7:0] TABLE2 [5:1][2:1];//table for sort
-reg [7:0] TABLE3 [4:1][2:1];//table for sort
-reg [7:0] TABLE4 [3:1][2:1];//table for sort
-reg [7:0] TABLE5 [2:1][2:1];//table for sort
-reg [7:0] temp   [6:1][2:1];
-reg [7:0] merge_cnt_1,merge_cnt_2,merge_index_1,merge_index_2;
+reg [6:0] TABLE1 [6:1][2:1];//table for ini sort;[6:1]means symbol order 6-1 from cnt big to small;[2:1]的[2]代表index;[1]代表總計的cnt
+reg [6:0] TABLE2 [5:1][2:1];//table for sort
+reg [6:0] TABLE3 [4:1][2:1];//table for sort
+reg [6:0] TABLE4 [3:1][2:1];//table for sort
+reg [6:0] TABLE5 [2:1][2:1];//table for sort
+reg [6:0] temp   [6:1][2:1];
+reg [6:0] merge_cnt_1,merge_cnt_2,merge_index_1,merge_index_2;
 
 ////判斷邏輯////共用部分////
-reg [7:0] com_index_2,com_index_1;
+reg [6:0] com_index_2,com_index_1;
 //com_set_1////
 assign com_out_1 = (com_in1 < com_in2)? 1:0;
 assign equal_signal_1 = (com_in1 == com_in2)?1:0;
@@ -387,12 +387,12 @@ parameter code_valid_OUT = 5'd27;  //
 parameter done           = 5'd28;  // 
 
 
-parameter symbol1 		= 8'b00000001;
-parameter symbol2 		= 8'b00000010;
-parameter symbol3 		= 8'b00000100;
-parameter symbol4 		= 8'b00001000;
-parameter symbol5 		= 8'b00010000;
-parameter symbol6 		= 8'b00100000;
+parameter symbol1 		= 7'b0000001;
+parameter symbol2 		= 7'b0000010;
+parameter symbol3 		= 7'b0000100;
+parameter symbol4 		= 7'b0001000;
+parameter symbol5 		= 7'b0010000;
+parameter symbol6 		= 7'b0100000;
 
 
 // =========================================== INDEX ==========================================
@@ -410,15 +410,15 @@ parameter symbol6 		= 8'b00100000;
 always@(*) begin
 case (cs) 
 	ini_sort_1_1 : begin
-		com_in1 	<= CNT2;
-		com_in2 	<= CNT3;
+		com_in1 	<= CNT2[6:0];
+		com_in2 	<= CNT3[6:0];
 		com_index_1 <= symbol2;
 		com_index_2 <= symbol3;
 
 		end
 	ini_sort_1_2 : begin
-		com_in1 	<= CNT5;
-		com_in2 	<= CNT6;
+		com_in1 	<= CNT5[6:0];
+		com_in2 	<= CNT6[6:0];
 		com_index_1 <= symbol5;
 		com_index_2 <= symbol6;
 	end
@@ -595,8 +595,8 @@ integer i;
 always@(posedge clk) begin
 	if (reset) begin
 		for (i = 1; i <= 6; i = i + 1) begin
-			temp[i][1] <= 8'd0;
-			temp[i][2] <= 8'd0;
+			temp[i][1] <= 7'd0;
+			temp[i][2] <= 7'd0;
 		end
 //		ini_sort_3_finish <= 1'd0;
 //		insert_1_finish   <= 1'd0;
@@ -619,8 +619,8 @@ always@(posedge clk) begin
 //			end
 //			else 
 			if(com1_is_zero_1 && !com2_is_zero_1) begin //代表合併項已經被放入table，temp6:2直接右移，temp[2]要放進tanl2
-				temp[6][1] <= 8'd0;
-				temp[6][2] <= 8'd0;
+				temp[6][1] <= 7'd0;
+				temp[6][2] <= 7'd0;
 				temp[5][1] <= temp[6][1];
 				temp[5][2] <= temp[6][2];
 				temp[4][1] <= temp[5][1];
@@ -634,12 +634,12 @@ always@(posedge clk) begin
 				 //第一個判斷代表temp6:2已全被放到table裡面，直接把temp1丟去table並更新為0就好,下一周期就會觸發判斷全0
 				 //第二個判斷代表temp[1]和temp[2]皆不是0並相等，直接把合併後的項temp[1]丟進去table並且把temp[1]更新為0(此處描述temp暫存器故僅更新為0)
 				 //第三個判斷代表若temp[1]<temp[2]且都不是0，把temp[1]的項丟進去table並更新為0
-				temp[1][1] <= 8'd0;
-				temp[1][2] <= 8'd0;
+				temp[1][1] <= 7'd0;
+				temp[1][2] <= 7'd0;
 			end
 			else if (!com_out_1) begin //代表若temp[1]>temp[2]且都不是0，把temp[2]放進table並右移temp6:2
-				temp[6][1] <= 8'd0;
-				temp[6][2] <= 8'd0;
+				temp[6][1] <= 7'd0;
+				temp[6][2] <= 7'd0;
 				temp[5][1] <= temp[6][1];
 				temp[5][2] <= temp[6][2];
 				temp[4][1] <= temp[5][1];
@@ -679,16 +679,16 @@ always@(posedge clk) begin
 			ini_sort_3_1 : begin
 				case(which_reg_should_be_replaced)	
 					1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
-						temp[3][1] <= 8'd0;
-						temp[3][2] <= 8'd0;
+						temp[3][1] <= 7'd0;
+						temp[3][2] <= 7'd0;
 						temp[2][1] <= temp[3][1];
 						temp[2][2] <= temp[3][2];
 						temp[1][1] <= temp[2][1];
 						temp[1][2] <= temp[2][2];
 					end
 					1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
-						temp[6][1] <= 8'd0;
-						temp[6][2] <= 8'd0;
+						temp[6][1] <= 7'd0;
+						temp[6][2] <= 7'd0;
 						temp[5][1] <= temp[6][1];
 						temp[5][2] <= temp[6][2];
 						temp[4][1] <= temp[5][1];
@@ -699,16 +699,16 @@ always@(posedge clk) begin
 			ini_sort_3_2 : begin
 				case(which_reg_should_be_replaced)	
 					1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
-						temp[3][1] <= 8'd0;
-						temp[3][2] <= 8'd0;
+						temp[3][1] <= 7'd0;
+						temp[3][2] <= 7'd0;
 						temp[2][1] <= temp[3][1];
 						temp[2][2] <= temp[3][2];
 						temp[1][1] <= temp[2][1];
 						temp[1][2] <= temp[2][2];
 					end
 					1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
-						temp[6][1] <= 8'd0;
-						temp[6][2] <= 8'd0;
+						temp[6][1] <= 7'd0;
+						temp[6][2] <= 7'd0;
 						temp[5][1] <= temp[6][1];
 						temp[5][2] <= temp[6][2];
 						temp[4][1] <= temp[5][1];
@@ -719,16 +719,16 @@ always@(posedge clk) begin
 			ini_sort_3_3 : begin
 				case(which_reg_should_be_replaced)	
 					1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
-						temp[3][1] <= 8'd0;
-						temp[3][2] <= 8'd0;
+						temp[3][1] <= 7'd0;
+						temp[3][2] <= 7'd0;
 						temp[2][1] <= temp[3][1];
 						temp[2][2] <= temp[3][2];
 						temp[1][1] <= temp[2][1];
 						temp[1][2] <= temp[2][2];
 					end
 					1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
-						temp[6][1] <= 8'd0;
-						temp[6][2] <= 8'd0;
+						temp[6][1] <= 7'd0;
+						temp[6][2] <= 7'd0;
 						temp[5][1] <= temp[6][1];
 						temp[5][2] <= temp[6][2];
 						temp[4][1] <= temp[5][1];
@@ -743,16 +743,16 @@ always@(posedge clk) begin
 ///				else begin
 					case(which_reg_should_be_replaced)	
 						1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
-							temp[3][1] <= 8'd0;
-							temp[3][2] <= 8'd0;
+							temp[3][1] <= 7'd0;
+							temp[3][2] <= 7'd0;
 							temp[2][1] <= temp[3][1];
 							temp[2][2] <= temp[3][2];
 							temp[1][1] <= temp[2][1];
 							temp[1][2] <= temp[2][2];
 						end
 						1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
-							temp[6][1] <= 8'd0;
-							temp[6][2] <= 8'd0;
+							temp[6][1] <= 7'd0;
+							temp[6][2] <= 7'd0;
 							temp[5][1] <= temp[6][1];
 							temp[5][2] <= temp[6][2];
 							temp[4][1] <= temp[5][1];
@@ -774,8 +774,8 @@ always@(posedge clk) begin
 				temp[4][2] <= TABLE1[5][2];
 				temp[5][1] <= TABLE1[6][1];
 				temp[5][2] <= TABLE1[6][2];
-				temp[6][1] <= 8'd0;
-				temp[6][2] <= 8'd0;
+				temp[6][1] <= 7'd0;
+				temp[6][2] <= 7'd0;
 
 			end
 			insert_ini_2 : begin
@@ -787,10 +787,10 @@ always@(posedge clk) begin
 				temp[3][2] <= TABLE2[4][2];
 				temp[4][1] <= TABLE2[5][1];
 				temp[4][2] <= TABLE2[5][2];
-				temp[5][1] <= 8'd0;
-				temp[5][2] <= 8'd0;
-				temp[6][1] <= 8'd0;
-				temp[6][2] <= 8'd0;
+				temp[5][1] <= 7'd0;
+				temp[5][2] <= 7'd0;
+				temp[6][1] <= 7'd0;
+				temp[6][2] <= 7'd0;
 			end
 			insert_ini_3 : begin
 				temp[1][1] <= merge_cnt;
@@ -799,26 +799,26 @@ always@(posedge clk) begin
 				temp[2][2] <= TABLE3[3][2];
 				temp[3][1] <= TABLE3[4][1];
 				temp[3][2] <= TABLE3[4][2];
-				temp[4][1] <= 8'd0;
-				temp[4][2] <= 8'd0;
-				temp[5][1] <= 8'd0;
-				temp[5][2] <= 8'd0;
-				temp[6][1] <= 8'd0;
-				temp[6][2] <= 8'd0;
+				temp[4][1] <= 7'd0;
+				temp[4][2] <= 7'd0;
+				temp[5][1] <= 7'd0;
+				temp[5][2] <= 7'd0;
+				temp[6][1] <= 7'd0;
+				temp[6][2] <= 7'd0;
 			end
 			insert_ini_4 : begin
 				temp[1][1] <= merge_cnt;
 				temp[1][2] <= merge_index;
 				temp[2][1] <= TABLE4[3][1];
 				temp[2][2] <= TABLE4[3][2];
-				temp[3][1] <= 8'd0;
-				temp[3][2] <= 8'd0;
-				temp[4][1] <= 8'd0;
-				temp[4][2] <= 8'd0;
-				temp[5][1] <= 8'd0;
-				temp[5][2] <= 8'd0;
-				temp[6][1] <= 8'd0;
-				temp[6][2] <= 8'd0;
+				temp[3][1] <= 7'd0;
+				temp[3][2] <= 7'd0;
+				temp[4][1] <= 7'd0;
+				temp[4][2] <= 7'd0;
+				temp[5][1] <= 7'd0;
+				temp[5][2] <= 7'd0;
+				temp[6][1] <= 7'd0;
+				temp[6][2] <= 7'd0;
 			end
 
 
@@ -832,24 +832,24 @@ end
 always@(posedge clk) begin
 	if (reset) begin
 		for (i = 1; i <= 6; i = i + 1) begin
-			TABLE1[i][1] <= 8'd0;
-			TABLE1[i][2] <= 8'd0;
+			TABLE1[i][1] <= 7'd0;
+			TABLE1[i][2] <= 7'd0;
 		end
 		for (i = 1; i <= 5; i = i+1) begin
-			TABLE2[i][1] <= 8'd0;
-			TABLE2[i][2] <= 8'd0;
+			TABLE2[i][1] <= 7'd0;
+			TABLE2[i][2] <= 7'd0;
 		end
 		for (i = 1; i <= 4; i = i+1) begin
-			TABLE3[i][1] <= 8'd0;
-			TABLE3[i][2] <= 8'd0;
+			TABLE3[i][1] <= 7'd0;
+			TABLE3[i][2] <= 7'd0;
 		end
 		for (i = 1; i <= 3; i = i+1) begin
-			TABLE4[i][1] <= 8'd0;
-			TABLE4[i][2] <= 8'd0;
+			TABLE4[i][1] <= 7'd0;
+			TABLE4[i][2] <= 7'd0;
 		end
 		for (i = 1; i <= 2; i = i+1) begin
-			TABLE5[i][1] <= 8'd0;
-			TABLE5[i][2] <= 8'd0;
+			TABLE5[i][1] <= 7'd0;
+			TABLE5[i][2] <= 7'd0;
 		end
 
 	end
@@ -857,7 +857,7 @@ always@(posedge clk) begin
 	else begin
 		case(cs)
 			ini_sort_1_1 : begin
-				TABLE1[1][1] <= CNT1;
+				TABLE1[1][1] <= CNT1[6:0];
 				TABLE1[1][2] <= symbol1;
 				TABLE1[2][1] <= which_one_have_be_put;
 				TABLE1[2][2] <= which_index_have_be_put;
@@ -866,7 +866,7 @@ always@(posedge clk) begin
 			end
 
 			ini_sort_1_2 : begin
-				TABLE1[4][1] <= CNT4;
+				TABLE1[4][1] <= CNT4[6:0];
 				TABLE1[4][2] <= symbol4;
 				TABLE1[5][1] <= which_one_have_be_put;
 				TABLE1[5][2] <= which_index_have_be_put;
