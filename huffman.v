@@ -1560,7 +1560,7 @@ always@(posedge clk) begin
 	end
 end
 
-//wire [7:0] T5_2,T5_1,  T4_3,T4_2,T4_1, T3_4,T3_3,T3_2,T3_1, T2_5,T2_4,T2_3,T2_2,T2_1, T1_6,T1_5,T1_4,T1_3,T1_2,T1_1;
+wire [7:0] T5_2,T5_1,  T4_3,T4_2,T4_1, T3_4,T3_3,T3_2,T3_1, T2_5,T2_4,T2_3,T2_2,T2_1, T1_6,T1_5,T1_4,T1_3,T1_2,T1_1;
 //wire [7:0] temp_1,temp_2,temp_3,temp_4,temp_5,temp_6;
 //
 //assign T5_2 = TABLE5[2][2];
