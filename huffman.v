@@ -194,9 +194,9 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd1) begin
 		CNT1 <= CNT1+8'd1;
 	end
-	else begin
-		CNT1 <= CNT1;
-	end
+	//else begin
+	//	CNT1 <= CNT1;
+	//end
 end
   
  //=======================================
@@ -208,9 +208,9 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd2) begin
 		CNT2 <= CNT2+8'd1;
 	end
-	else begin
-		CNT2 <= CNT2;
-	end
+	//else begin
+	//	CNT2 <= CNT2;
+	//end
 end
  
 //=======================================
@@ -222,9 +222,9 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd3) begin
 		CNT3 <= CNT3+8'd1;
 	end
-	else begin
-		CNT3 <= CNT3;
-	end
+	//else begin
+	//	CNT3 <= CNT3;
+	//end
 end
 
 //=======================================
@@ -236,9 +236,9 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd4) begin
 		CNT4 <= CNT4+8'd1;
 	end
-	else begin
-		CNT4 <= CNT4;
-	end
+	//else begin
+	//	CNT4 <= CNT4;
+	//end
 end
 
 //=======================================
@@ -250,9 +250,9 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd5) begin
 		CNT5 <= CNT5 + 8'd1;
 	end
-	else begin
-		CNT5 <= CNT5;
-	end
+	//else begin
+	//	CNT5 <= CNT5;
+	//end
 end
   
 //=======================================
@@ -264,9 +264,9 @@ always@(posedge clk) begin
 	else if (gray_valid && gray_data==8'd6) begin
 		CNT6 <= CNT6+8'd1;
 	end
-	else begin
-		CNT6 <= CNT6;
-	end
+	//else begin
+	//	CNT6 <= CNT6;
+	//end
 end
   
 //code valid///////////////
