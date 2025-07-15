@@ -8,8 +8,8 @@ input [7:0] gray_data;
 output reg CNT_valid;	
 output reg [7:0] CNT1, CNT2, CNT3, CNT4, CNT5, CNT6;
 output reg code_valid;
-output [7:0] HC1, HC2, HC3, HC4, HC5, HC6;
-output [7:0] M1, M2, M3, M4, M5, M6;
+output reg [7:0] HC1, HC2, HC3, HC4, HC5, HC6;
+output reg [7:0] M1, M2, M3, M4, M5, M6;
 //============================================
 parameter idle       	 = 5'd0;   // idle
 parameter rec        	 = 5'd1;   //reset 
@@ -53,7 +53,7 @@ reg [4:0] cs,ns;
 //reg encoding_done,receive_done;
 //reg [6:0] A1,A2,A3,A4,A5,A6 [6:0];
 //reg [6:0] rec_count;
-wire ini_sort_3_finish,insert_3_finish,insert_1_finish,insert_2_finish;
+reg ini_sort_3_finish,insert_3_finish,insert_1_finish,insert_2_finish;
 // =========================================== INDEX ==========================================
 	//  - FSM done
 	//  - CNT_valid
@@ -275,38 +275,9 @@ always@(posedge clk) begin
 	else if(cs == split_5) begin
 		code_valid <= 1'b1;
 	end
-	//else if(cs == code_valid_OUT) begin
-	//	code_valid <= 1'b0;
-	//end
-
 end
 
 //sorting module//////
-sorting ST0 (.cs(cs),.clk(clk),.reset(reset),.CNT1(CNT1), .CNT2(CNT2), .CNT3(CNT3), .CNT4(CNT4), .CNT5(CNT5), .CNT6(CNT6)
-, .ini_sort_3_finish(ini_sort_3_finish), .insert_1_finish(insert_1_finish), .insert_2_finish(insert_2_finish), .insert_3_finish(insert_3_finish)
-, .HC1(HC1), .HC2(HC2), .HC3(HC3), .HC4(HC4), .HC5(HC5), .HC6(HC6), .M1(M1), .M2(M2), .M3(M3), .M4(M4), .M5(M5), .M6(M6)
-);
-
-  
-endmodule
-
-
-module sorting (cs,clk,reset, CNT1, CNT2, CNT3, CNT4, CNT5, CNT6, ini_sort_3_finish, insert_1_finish, insert_2_finish,insert_3_finish,
-	HC1, HC2, HC3, HC4, HC5, HC6, M1, M2, M3, M4, M5, M6);
-//process sort and merge algo in ini sort state
-//process insertion algo in the following state
-//using cs to control
-input clk;
-input reset;
-input [4:0] cs;
-input [7:0] CNT1, CNT2, CNT3, CNT4, CNT5, CNT6;
-output reg ini_sort_3_finish;
-output reg insert_1_finish,insert_2_finish,insert_3_finish;
-//output reg code_valid;
-output reg [7:0] HC1, HC2, HC3, HC4, HC5, HC6;
-output reg [7:0] M1, M2, M3, M4, M5, M6;
-
-
 wire com_out_1;
 wire equal_signal_1;
 wire com1_is_zero_1;
@@ -327,6 +298,8 @@ reg [6:0] TABLE4 [3:1][2:1];//table for sort
 reg [6:0] TABLE5 [2:1][2:1];//table for sort
 reg [6:0] temp   [6:1][2:1];
 reg [6:0] merge_cnt_1,merge_cnt_2,merge_index_1,merge_index_2;
+
+
 
 ////判斷邏輯////共用部分////
 reg [6:0] com_index_2,com_index_1;
@@ -353,36 +326,6 @@ assign merge_cnt = merge_cnt_1 + merge_cnt_2;
 assign merge_index = merge_index_1 | merge_index_2;
 
 
-//============================================
-parameter idle       	 = 5'd0;   // idle
-parameter rec        	 = 5'd1;   //reset 
-parameter CNT_OUT    	 = 5'd2;   //send cnt to output
-parameter ini_sort_1_1 	 = 5'd3;   //
-parameter ini_sort_1_2 	 = 5'd4;   //
-parameter ini_sort_2_1_1 = 5'd5;   //
-parameter ini_sort_2_1_2 = 5'd6;   //
-parameter ini_sort_2_2_1 = 5'd7;   //
-parameter ini_sort_2_2_2 = 5'd8;   //
-parameter ini_sort_3_1   = 5'd9;   //
-parameter ini_sort_3_2   = 5'd10;  //
-parameter ini_sort_3_3   = 5'd11;  //
-parameter ini_sort_3_4   = 5'd12;  //
-parameter ini_sort_3_5   = 5'd13;  //
-parameter insert_ini_1   = 5'd14;  //
-parameter insert_1       = 5'd15;  //
-parameter insert_ini_2   = 5'd16;  //
-parameter insert_2       = 5'd17;  //
-parameter insert_ini_3   = 5'd18;  //
-parameter insert_3       = 5'd19;  //
-parameter insert_ini_4   = 5'd20;  //其實不需要這個狀態，只是方便程式可讀性以及方便共用combinational邏輯!
-parameter insert_4       = 5'd21;  //
-parameter split_1        = 5'd22;  //
-parameter split_2        = 5'd23;  //
-parameter split_3        = 5'd24;  //
-parameter split_4        = 5'd25;  //
-parameter split_5        = 5'd26;  //
-parameter code_valid_OUT = 5'd27;  //
-parameter done           = 5'd28;  // 
 
 
 parameter symbol1 		= 7'b0000001;
@@ -1477,48 +1420,9 @@ always@(posedge clk) begin
 		endcase
 	end
 end
-
-///////////////////check waveform/////////////////////////////////////////////////////////////////////////////////////
-//wire [7:0] T5_2,T5_1,  T4_3,T4_2,T4_1, T3_4,T3_3,T3_2,T3_1, T2_5,T2_4,T2_3,T2_2,T2_1, T1_6,T1_5,T1_4,T1_3,T1_2,T1_1;
-//wire [7:0] temp_1,temp_2,temp_3,temp_4,temp_5,temp_6;
-//
-//assign T5_2 = TABLE5[2][2];
-//assign T5_1 = TABLE5[1][2];
-//
-//
-//assign T4_3 = TABLE4[3][2];
-//assign T4_2 = TABLE4[2][2];
-//assign T4_1 = TABLE4[1][2];
-//
-//
-//assign T3_4 = TABLE3[4][2];
-//assign T3_3 = TABLE3[3][2];
-//assign T3_2 = TABLE3[2][2];
-//assign T3_1 = TABLE3[1][2];
-//
-//
-//
-//assign T2_5 = TABLE2[5][2];
-//assign T2_4 = TABLE2[4][2];
-//assign T2_3 = TABLE2[3][2];
-//assign T2_2 = TABLE2[2][2];
-//assign T2_1 = TABLE2[1][2];
-//
-//
-//
-//assign T1_6 = TABLE1[6][2];
-//assign T1_5 = TABLE1[5][2];
-//assign T1_4 = TABLE1[4][2];
-//assign T1_3 = TABLE1[3][2];
-//assign T1_2 = TABLE1[2][2];
-//assign T1_1 = TABLE1[1][2];
-//
-//assign temp_6 = temp[6][2];
-//assign temp_5 = temp[5][2];
-//assign temp_4 = temp[4][2];
-//assign temp_3 = temp[3][2];
-//assign temp_2 = temp[2][2];
-//assign temp_1 = temp[1][2];
-
+  
 endmodule
+
+
+
 
