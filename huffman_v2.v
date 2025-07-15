@@ -41,18 +41,11 @@ parameter split_5        = 5'd26;  //
 parameter code_valid_OUT = 5'd27;  //結束狀態
 
 parameter done            = 5'd28;   ///////////////////////////////////// 
-parameter idle1           = 5'd29;  //  							    //
+parameter idle1           = 5'd29;  // 不會進此狀態，只是狀態寫滿面積比較小//
 parameter idle2           = 5'd30;  // 								    //
-parameter idle3           = 5'd31;  // 								    //
-//parameter idle4           = 5'd32;  // 不會進此狀態，只是狀態寫滿面積比較小//
-//parameter idle5           = 5'd33;  // 								    //
-//parameter idle6           = 5'd34;  // 								    //
-//parameter idle7           = 5'd35;  //////////////////////////////////////
+parameter idle3           = 5'd31;  //////////////////////////////////////
 //============================================
 reg [4:0] cs,ns;
-//reg encoding_done,receive_done;
-//reg [6:0] A1,A2,A3,A4,A5,A6 [6:0];
-//reg [6:0] rec_count;
 reg ini_sort_3_finish,insert_3_finish,insert_1_finish,insert_2_finish;
 // =========================================== INDEX ==========================================
 	//  - FSM done
@@ -202,7 +195,7 @@ end
 
 
 //=======================================
-  //CNT1
+  //CNT1-6
 always@(posedge clk) begin
 	if (reset) begin
 		CNT1 <= 8'd0;
@@ -211,6 +204,12 @@ always@(posedge clk) begin
 		CNT4 <= 8'd0;
 		CNT5 <= 8'd0;
 		CNT6 <= 8'd0;
+		TABLE_idx[1] <= 6'd0;
+		TABLE_idx[2] <= 6'd0;
+		TABLE_idx[3] <= 6'd0;
+		TABLE_idx[4] <= 6'd0;
+		TABLE_idx[5] <= 6'd0;
+		TABLE_idx[6] <= 6'd0;
 	end
 	else if (gray_valid)
 		case(gray_data) 
@@ -221,63 +220,31 @@ always@(posedge clk) begin
 		8'd5 : CNT5 <= CNT5+8'd1;
 		8'd6 : CNT6 <= CNT6+8'd1;
 		endcase
+
+		case(cs)
+			ini_sort_2_1_1: begin
+				CNT1[6:0] <= which_one_have_be_put; 
+				TABLE_idx[1] <= which_index_have_be_put;
+			end
+			ini_sort_2_1_2: begin
+				CNT2[6:0] <= which_one_have_be_put;
+				TABLE_idx[2] <= which_index_have_be_put;
+				CNT3[6:0] <= the_inverse_one_have_be_put;
+				TABLE_idx[3] <= the_inverse_index_have_be_put;
+			end
+			ini_sort_2_2_1 : begin
+				CNT4[6:0] <= which_one_have_be_put;
+				TABLE_idx[4] <= which_index_have_be_put;
+			end
+			ini_sort_2_2_2: begin
+				CNT5[6:0] <= which_one_have_be_put;
+				TABLE_idx[5] <= which_index_have_be_put;
+				CNT6[6:0] <= the_inverse_one_have_be_put;
+				TABLE_idx[5] <= the_inverse_index_have_be_put;
+			end
+		endcase
 end
-  
- //=======================================
-  //CNT2
-//always@(posedge clk) begin
-//	if (reset) begin
-//		CNT2 <= 8'd0;
-//	end
-//	else if (gray_valid && gray_data==8'd2) begin
-//		CNT2 <= CNT2+8'd1;
-//	end
-//end
-// 
-////=======================================
-//  //CNT3
-//always@(posedge clk) begin
-//	if (reset) begin
-//		CNT3 <= 8'd0;
-//	end
-//	else if (gray_valid && gray_data==8'd3) begin
-//		CNT3 <= CNT3+8'd1;
-//	end
-//end
-//
-////=======================================
-//  //CN4
-//always@(posedge clk) begin
-//	if (reset) begin
-//		CNT4 <= 8'd0;
-//	end
-//	else if (gray_valid && gray_data==8'd4) begin
-//		CNT4 <= CNT4+8'd1;
-//	end
-//end
-//
-////=======================================
-//  //CNT5
-//always@(posedge clk) begin
-//	if (reset) begin
-//		CNT5 <= 8'd0;
-//	end
-//	else if (gray_valid && gray_data==8'd5) begin
-//		CNT5 <= CNT5 + 8'd1;
-//	end
-//end
-//  
-////=======================================
-//  //CNT6
-//always@(posedge clk) begin
-//	if (reset) begin
-//		CNT6 <= 8'd0;
-//	end
-//	else if (gray_valid && gray_data==8'd6) begin
-//		CNT6 <= CNT6+8'd1;
-//	end
-//end
-  
+ 
 //code valid///////////////
 always@(posedge clk) begin
 	if (reset) begin
@@ -301,23 +268,29 @@ wire which_reg_should_be_replaced;
 
 ////////注意每個index也是開到8bit是可以再優化，但因為寫法方便先暫用陣列
 reg [6:0] com_in1,com_in2;
-//reg [5:0] com_in4,com_in5;
-reg [6:0] TABLE1 [6:1][2:1];//table for ini sort;[6:1]means symbol order 6-1 from cnt big to small;[2:1]的[2]代表index;[1]代表總計的cnt
-reg [6:0] TABLE2 [5:1][2:1];//table for sort
-reg [6:0] TABLE3 [4:1][2:1];//table for sort
-reg [6:0] TABLE4 [3:1][2:1];//table for sort
-reg [6:0] TABLE5 [2:1][2:1];//table for sort
-reg [6:0] temp   [6:1][2:1];
-reg [6:0] merge_cnt_1,merge_cnt_2,merge_index_1,merge_index_2;
+//reg [6:0] TABLE1 [6:1][2:1];//table for ini sort;[6:1]means symbol order 6-1 from cnt big to small;[2:1]的[2]代表index;[1]代表總計的cnt
+//reg [6:0] TABLE2 [5:1][2:1];//table for sort
+//reg [6:0] TABLE3 [4:1][2:1];//table for sort
+//reg [6:0] TABLE4 [3:1][2:1];//table for sort
+//reg [6:0] TABLE5 [2:1][2:1];//table for sort
+//reg [6:0] temp   [6:1][2:1];
+reg [5:0] TABLE_idx [6:1];
+reg [6:0] temp_cnt  [6:1];
+reg [5:0] temp_idx  [6:1];
+
+
+
+reg [6:0] merge_cnt_1,merge_cnt_2;
+reg [5:0] merge_index_1,merge_index_2;
 
 
 
 ////判斷邏輯////共用部分////
-reg [6:0] com_index_2,com_index_1;
+reg [5:0] com_index_2,com_index_1;
 //com_set_1////
 assign com_out_1 = (com_in1 < com_in2)? 1:0;
 assign equal_signal_1 = (com_in1 == com_in2)?1:0;
-assign com_index = (com_index_1[5:0] < com_index_2[5:0])?1:0;//機率一樣時，大的放下面
+assign com_index = (com_index_1 < com_index_2)?1:0;//機率一樣時，大的放下面
 assign com1_is_zero_1 = !(|com_index_1);//1代表全0,0代表有一
 assign com2_is_zero_1 = !(|com_index_2);//1代表全0,0代表有一，用index比較是怕測資有任一symbol都沒有出現
 
@@ -339,12 +312,12 @@ assign merge_index = merge_index_1 | merge_index_2;
 
 
 
-parameter symbol1 		= 7'b0000001;
-parameter symbol2 		= 7'b0000010;
-parameter symbol3 		= 7'b0000100;
-parameter symbol4 		= 7'b0001000;
-parameter symbol5 		= 7'b0010000;
-parameter symbol6 		= 7'b0100000;
+parameter symbol1 		= 6'b000001;
+parameter symbol2 		= 6'b000010;
+parameter symbol3 		= 6'b000100;
+parameter symbol4 		= 6'b001000;
+parameter symbol5 		= 6'b010000;
+parameter symbol6 		= 6'b100000;
 
 
 // =========================================== INDEX ==========================================
@@ -579,15 +552,23 @@ always@(*) begin
 	endcase
 end
 
-///temp reg & insert_finish signal//
+///temp_cnt & temp_idx //
 integer i;
 
 always@(posedge clk) begin
 	if (reset) begin
-		for (i = 1; i <= 6; i = i + 1) begin
-			temp[i][1] <= 7'd0;
-			temp[i][2] <= 7'd0;
-		end
+		temp_cnt[1] <= 7'd0;
+		temp_idx[1]	<= 6'd0;
+		temp_cnt[2]	<= 7'd0;
+		temp_idx[2]	<= 6'd0;
+		temp_cnt[3]	<= 7'd0;
+		temp_idx[3]	<= 6'd0;
+		temp_cnt[4]	<= 7'd0;
+		temp_idx[4]	<= 6'd0;
+		temp_cnt[5]	<= 7'd0;
+		temp_idx[5]	<= 6'd0;
+		temp_cnt[6]	<= 7'd0;
+		temp_idx[6]	<= 6'd0;
 	end
 
 	else begin
@@ -630,26 +611,50 @@ always@(posedge clk) begin
 
 
 		case (cs)
-			ini_sort_2_1_1: begin
-				temp[1][1] <= which_one_have_be_put;
-				temp[1][2] <= which_index_have_be_put;
+			ini_sort_1_1 : begin
+				temp_cnt[1] <= CNT1[6:0];
+				temp_idx[1] <= symbol1;
+				temp_cnt[2] <= which_one_have_be_put;
+				temp_idx[2] <= which_index_have_be_put;
+				temp_cnt[3] <= the_inverse_one_have_be_put;
+				temp_idx[3] <= the_inverse_index_have_be_put;
 			end
-			ini_sort_2_1_2: begin
-				temp[2][1] <= which_one_have_be_put;
-				temp[2][2] <= which_index_have_be_put;
-				temp[3][1] <= the_inverse_one_have_be_put;
-				temp[3][2] <= the_inverse_index_have_be_put;
+			ini_sort_1_2 : begin
+				temp_cnt[4] <= CNT4[6:0];
+				temp_idx[4] <= symbol4;
+				temp_cnt[5] <= which_one_have_be_put;
+				temp_idx[5] <= which_index_have_be_put;
+				temp_cnt[6] <= the_inverse_one_have_be_put;
+				temp_idx[6] <= the_inverse_index_have_be_put;
 			end
+			ini_sort_2_1_1 : begin
+				if(which_reg_should_be_replaced) begin //若成立代表[1]的被放進temp reg，故用[3]取代
+					temp_cnt[1] <= temp_cnt[3];
+					temp_idx[1] <= temp_idx[3];
+				end
+				else begin
+					temp_cnt[2] <= temp_cnt[3];
+					temp_idx[2] <= temp_idx[3];
+				end
+			end
+
 			ini_sort_2_2_1 : begin
-				temp[4][1] <= which_one_have_be_put;
-				temp[4][2] <= which_index_have_be_put;
+				if(which_reg_should_be_replaced) begin //若成立代表[4]的被放進temp reg，故用[6]取代
+					temp_cnt[4] <= temp_cnt[6];
+					temp_idx[4] <= temp_idx[6];
+				end
+				else begin
+					temp_cnt[5] <= temp_cnt[6];
+					temp_idx[5] <= temp_idx[6];
+				end
+
 			end
-			ini_sort_2_2_2: begin
-				temp[5][1] <= which_one_have_be_put;
-				temp[5][2] <= which_index_have_be_put;
-				temp[6][1] <= the_inverse_one_have_be_put;
-				temp[6][2] <= the_inverse_index_have_be_put;
-			end
+
+	//		ini_sort_2_2_1 : begin
+	//			CNT4[6:0] <= which_one_have_be_put; 尚未搬到CNT4
+	//			TABLE_idx[4] <= which_index_have_be_put;尚未搬到TABLE_IDX4
+	//		end
+
 
 			ini_sort_3_1 : begin
 				case(which_reg_should_be_replaced)	
@@ -797,7 +802,7 @@ always@(posedge clk) begin
 
 end
 
-///TABLE1-6
+///這邊邏輯要搬到CNT1-6
 
 always@(posedge clk) begin
 	if (reset) begin
@@ -826,46 +831,46 @@ always@(posedge clk) begin
 
 	else begin
 		case(cs)
-			ini_sort_1_1 : begin
-				TABLE1[1][1] <= CNT1[6:0];
-				TABLE1[1][2] <= symbol1;
-				TABLE1[2][1] <= which_one_have_be_put;
-				TABLE1[2][2] <= which_index_have_be_put;
-				TABLE1[3][1] <= the_inverse_one_have_be_put;
-				TABLE1[3][2] <= the_inverse_index_have_be_put;
-			end
+			//ini_sort_1_1 : begin
+			//	temp_cnt[1] <= CNT1[6:0];
+			//	temp_idx[1] <= symbol1;
+			//	temp_cnt[2] <= which_one_have_be_put;
+			//	temp_idx[2] <= which_index_have_be_put;
+			//	temp_cnt[3] <= the_inverse_one_have_be_put;
+			//	temp_idx[3] <= the_inverse_index_have_be_put;
+			//end
+//已搬遷
+			//ini_sort_1_2 : begin
+			//	temp_cnt[4] <= CNT4[6:0];
+			//	temp_idx[4] <= symbol4;
+			//	temp_cnt[5] <= which_one_have_be_put;
+			//	temp_idx[5] <= which_index_have_be_put;
+			//	temp_cnt[6] <= the_inverse_one_have_be_put;
+			//	temp_idx[6] <= the_inverse_index_have_be_put;
+			//end
 
-			ini_sort_1_2 : begin
-				TABLE1[4][1] <= CNT4[6:0];
-				TABLE1[4][2] <= symbol4;
-				TABLE1[5][1] <= which_one_have_be_put;
-				TABLE1[5][2] <= which_index_have_be_put;
-				TABLE1[6][1] <= the_inverse_one_have_be_put;
-				TABLE1[6][2] <= the_inverse_index_have_be_put;
-			end
-
-			ini_sort_2_1_1 : begin
-				if(which_reg_should_be_replaced) begin //若成立代表[1]的被放進temp reg，故用[3]取代
-					TABLE1[1][1] <= TABLE1[3][1];
-					TABLE1[1][2] <= TABLE1[3][2];
-				end
-				else begin
-					TABLE1[2][1] <= TABLE1[3][1];
-					TABLE1[2][2] <= TABLE1[3][2];
-				end
-			end
-
-			ini_sort_2_2_1 : begin
-				if(which_reg_should_be_replaced) begin //若成立代表[4]的被放進temp reg，故用[6]取代
-					TABLE1[4][1] <= TABLE1[6][1];
-					TABLE1[4][2] <= TABLE1[6][2];
-				end
-				else begin
-					TABLE1[5][1] <= TABLE1[6][1];
-					TABLE1[5][2] <= TABLE1[6][2];
-				end
-
-			end
+		//	ini_sort_2_1_1 : begin
+		//		if(which_reg_should_be_replaced) begin //若成立代表[1]的被放進temp reg，故用[3]取代
+		//			temp_cnt[1] <= temp_cnt[3];
+		//			temp_idx[1] <= temp_idx[3];
+		//		end
+		//		else begin
+		//			temp_cnt[2] <= temp_cnt[3];
+		//			temp_idx[2] <= temp_idx[3];
+		//		end
+		//	end
+//
+		//	ini_sort_2_2_1 : begin
+		//		if(which_reg_should_be_replaced) begin //若成立代表[4]的被放進temp reg，故用[6]取代
+		//			temp_cnt[4] <= temp_cnt[6];
+		//			temp_idx[4] <= temp_idx[6];
+		//		end
+		//		else begin
+		//			temp_cnt[5] <= temp_cnt[6];
+		//			temp_idx[5] <= temp_idx[6];
+		//		end
+//
+		//	end
 			ini_sort_3_1 : begin
 				TABLE1[1][1] <= which_one_have_be_put;
 				TABLE1[1][2] <= which_index_have_be_put;
