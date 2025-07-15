@@ -206,66 +206,77 @@ end
 always@(posedge clk) begin
 	if (reset) begin
 		CNT1 <= 8'd0;
+		CNT2 <= 8'd0;
+		CNT3 <= 8'd0;
+		CNT4 <= 8'd0;
+		CNT5 <= 8'd0;
+		CNT6 <= 8'd0;
 	end
-	else if (gray_valid && gray_data==8'd1) begin
-		CNT1 <= CNT1+8'd1;
-	end
+	else if (gray_valid)
+		case(gray_data) 
+		8'd1 : CNT1 <= CNT1+8'd1;
+		8'd2 : CNT2 <= CNT2+8'd1;
+		8'd3 : CNT3 <= CNT3+8'd1;
+		8'd4 : CNT4 <= CNT4+8'd1;
+		8'd5 : CNT5 <= CNT5+8'd1;
+		8'd6 : CNT6 <= CNT6+8'd1;
+		endcase
 end
   
  //=======================================
   //CNT2
-always@(posedge clk) begin
-	if (reset) begin
-		CNT2 <= 8'd0;
-	end
-	else if (gray_valid && gray_data==8'd2) begin
-		CNT2 <= CNT2+8'd1;
-	end
-end
- 
-//=======================================
-  //CNT3
-always@(posedge clk) begin
-	if (reset) begin
-		CNT3 <= 8'd0;
-	end
-	else if (gray_valid && gray_data==8'd3) begin
-		CNT3 <= CNT3+8'd1;
-	end
-end
-
-//=======================================
-  //CN4
-always@(posedge clk) begin
-	if (reset) begin
-		CNT4 <= 8'd0;
-	end
-	else if (gray_valid && gray_data==8'd4) begin
-		CNT4 <= CNT4+8'd1;
-	end
-end
-
-//=======================================
-  //CNT5
-always@(posedge clk) begin
-	if (reset) begin
-		CNT5 <= 8'd0;
-	end
-	else if (gray_valid && gray_data==8'd5) begin
-		CNT5 <= CNT5 + 8'd1;
-	end
-end
-  
-//=======================================
-  //CNT6
-always@(posedge clk) begin
-	if (reset) begin
-		CNT6 <= 8'd0;
-	end
-	else if (gray_valid && gray_data==8'd6) begin
-		CNT6 <= CNT6+8'd1;
-	end
-end
+//always@(posedge clk) begin
+//	if (reset) begin
+//		CNT2 <= 8'd0;
+//	end
+//	else if (gray_valid && gray_data==8'd2) begin
+//		CNT2 <= CNT2+8'd1;
+//	end
+//end
+// 
+////=======================================
+//  //CNT3
+//always@(posedge clk) begin
+//	if (reset) begin
+//		CNT3 <= 8'd0;
+//	end
+//	else if (gray_valid && gray_data==8'd3) begin
+//		CNT3 <= CNT3+8'd1;
+//	end
+//end
+//
+////=======================================
+//  //CN4
+//always@(posedge clk) begin
+//	if (reset) begin
+//		CNT4 <= 8'd0;
+//	end
+//	else if (gray_valid && gray_data==8'd4) begin
+//		CNT4 <= CNT4+8'd1;
+//	end
+//end
+//
+////=======================================
+//  //CNT5
+//always@(posedge clk) begin
+//	if (reset) begin
+//		CNT5 <= 8'd0;
+//	end
+//	else if (gray_valid && gray_data==8'd5) begin
+//		CNT5 <= CNT5 + 8'd1;
+//	end
+//end
+//  
+////=======================================
+//  //CNT6
+//always@(posedge clk) begin
+//	if (reset) begin
+//		CNT6 <= 8'd0;
+//	end
+//	else if (gray_valid && gray_data==8'd6) begin
+//		CNT6 <= CNT6+8'd1;
+//	end
+//end
   
 //code valid///////////////
 always@(posedge clk) begin
