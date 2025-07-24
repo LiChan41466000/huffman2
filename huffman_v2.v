@@ -70,9 +70,9 @@ wire [5:0] merge_index_1,merge_index_2;
 ////判斷邏輯////共用部分////
 reg [5:0] com_index_2,com_index_1;
 //com_set_1////
-assign com_out_1 = (com_in1 < com_in2)? 1:0;
-assign equal_signal_1 = (com_in1 == com_in2)?1:0;
-assign com_index = (com_index_1 < com_index_2)?1:0;//機率一樣時，大的放下面
+assign com_out_1 = (com_in1 < com_in2);
+assign equal_signal_1 = (com_in1 == com_in2);
+assign com_index = (com_index_1 < com_index_2);//機率一樣時，大的放下面
 assign com1_is_zero_1 = !(|com_index_1);//1代表全0,0代表有一
 assign com2_is_zero_1 = !(|com_index_2);//1代表全0,0代表有一，用index比較是怕測資有任一symbol都沒有出現
 
@@ -80,16 +80,16 @@ assign com2_is_zero_1 = !(|com_index_2);//1代表全0,0代表有一，用index�
 assign which_one_have_be_put = (equal_signal_1)? ((com_index)?com_in2:com_in1) :((com_out_1)?com_in1:com_in2);
 assign which_index_have_be_put = (equal_signal_1)? ((com_index)?com_index_2:com_index_1) :((com_out_1)?com_index_1:com_index_2);
 ////在ini_sort_2_1_1及2_2_1中，記憶哪一個reg該被大的覆蓋，若1代表覆蓋com_in1代表的TABLE1暫存。反之亦然
-assign which_reg_should_be_replaced = (equal_signal_1)? ((com_index)?0:1) :((com_out_1)?1:0);
-
+assign which_reg_should_be_replaced = (equal_signal_1)? (!(com_index)) :((com_out_1));
 
 
 ////找出兩個比較項中，出現次數比較大的項目;若相等，則找出index較小的項目
 assign the_inverse_one_have_be_put = (equal_signal_1)? ((com_index)?com_in1:com_in2) :((com_out_1)?com_in2:com_in1);
 assign the_inverse_index_have_be_put = (equal_signal_1)? ((com_index)?com_index_1:com_index_2) :((com_out_1)?com_index_2:com_index_1);
 
-assign merge_cnt = merge_cnt_1 + merge_cnt_2;
-assign merge_index = merge_index_1 | merge_index_2;
+assign merge_cnt = temp_cnt[1] + temp_cnt[2];
+assign merge_index = temp_idx[1] | temp_idx[2];
+
 
 
 parameter symbol1 		= 6'b000001;
@@ -247,6 +247,23 @@ end
 
 //=======================================
   //CNT1-6
+//reg [7:0] cnt_sel;        // 送進唯一 adder 的 operand
+//wire [7:0] cnt_inc;       // adder 輸出
+//assign    cnt_inc = cnt_sel + 8'd1;   // <<< 只出現這一次加法 !!!
+//
+///* ========= combinational：決定要加哪顆 ========= */
+//always @(*) begin
+//    case (gray_data[2:0])          // gray_data 只在 1~6 時會用到
+//        3'd1: cnt_sel = CNT1;
+//        3'd2: cnt_sel = CNT2;
+//        3'd3: cnt_sel = CNT3;
+//        3'd4: cnt_sel = CNT4;
+//        3'd5: cnt_sel = CNT5;
+//        3'd6: cnt_sel = CNT6;
+//        default: cnt_sel = 8'd0;     // 非法時隨便給 0，不影響功能
+//    endcase
+//end
+
 always@(posedge clk) begin
 	if (reset) begin
 		CNT1 <= 8'd0;
@@ -263,13 +280,13 @@ always@(posedge clk) begin
 		TABLE_idx[6] <= 6'd0;
 	end
 	else if (gray_valid)
-		case(gray_data) 
-		8'd1 : CNT1 <= CNT1+8'd1;
-		8'd2 : CNT2 <= CNT2+8'd1;
-		8'd3 : CNT3 <= CNT3+8'd1;
-		8'd4 : CNT4 <= CNT4+8'd1;
-		8'd5 : CNT5 <= CNT5+8'd1;
-		8'd6 : CNT6 <= CNT6+8'd1;
+		case(gray_data[2:0]) 
+		3'd1 : CNT1 <= CNT1 + 1;
+		3'd2 : CNT2 <= CNT2 + 1;
+		3'd3 : CNT3 <= CNT3 + 1;
+		3'd4 : CNT4 <= CNT4 + 1;
+		3'd5 : CNT5 <= CNT5 + 1;
+		3'd6 : CNT6 <= CNT6 + 1;
 		endcase
 
 
@@ -558,12 +575,6 @@ case (cs)
 endcase
 end
 
-///merge cnt1&2 merge idx 1& 2///
-assign merge_cnt_1 = temp_cnt[1];
-assign merge_cnt_2 = temp_cnt[2];
-assign merge_index_1 = temp_idx[1];
-assign merge_index_2 = temp_idx[2];
-
 //ini_sort_3_finish
 always@(*) begin
 	case(cs)
@@ -768,8 +779,8 @@ always@(posedge clk) begin
 						temp_idx[5] <= TABLE_idx[1];
 					end
 					else begin
-						if (equal_signal_1)begin			////////////////////////
-							temp_cnt[5] <= merge_cnt;		//MODIFY HERE !!!!!!!!//
+						if (equal_signal_1)begin		////////////////////////
+							temp_cnt[5] <= merge_cnt;	//MODIFY HERE !!!!!!!!//
 							temp_idx[5] <= merge_index;	////////////////////////
 						end	
 
@@ -816,8 +827,8 @@ always@(posedge clk) begin
 						temp_idx[4] <= TABLE_idx[1];
 					end
 					else begin
-						if(equal_signal_1)begin				////////////////////////
-							temp_cnt[4] <= merge_cnt;		//MODIFY HERE !!!!!!!!//
+						if(equal_signal_1)begin			  ////////////////////////
+							temp_cnt[4] <= merge_cnt;	  //MODIFY HERE !!!!!!!!//
 							temp_idx[4] <= merge_index;   ////////////////////////
 						end
 
@@ -862,8 +873,8 @@ always@(posedge clk) begin
 						temp_idx[3] <= TABLE_idx[1];
 					end
 					else begin
-						if(equal_signal_1)begin				////////////////////////
-							temp_cnt[3] <= merge_cnt;		//MODIFY HERE !!!!!!!!//
+						if(equal_signal_1)begin			////////////////////////
+							temp_cnt[3] <= merge_cnt;	//MODIFY HERE !!!!!!!!//
 							temp_idx[3] <= merge_index;	////////////////////////
 						end
 						else begin
