@@ -35,13 +35,9 @@ parameter insert_ini_4   = 5'd20;  //其實不需要這個狀態，只是方便�
 parameter insert_4       = 5'd21;  //
 parameter insert_ini_5   = 5'd22;  //
 parameter split_1        = 5'd23;  //
-parameter split_5        = 5'd26;  //
-parameter code_valid_OUT = 5'd27;  //結束狀態
+parameter split_5        = 5'd24;  //
+parameter code_valid_OUT = 5'd25;  //結束狀態
 
-parameter done            = 5'd28;   ///////////////////////////////////// 
-parameter idle1           = 5'd29;  // 不會進此狀態，只是狀態寫滿面積比較小//
-parameter idle2           = 5'd30;  // 								    //
-parameter idle3           = 5'd31;  //////////////////////////////////////
 //============================================
 reg [4:0] cs,ns;
 reg ini_sort_3_finish,insert_3_finish,insert_1_finish,insert_2_finish;
@@ -58,7 +54,7 @@ wire [5:0] which_index_have_be_put, the_inverse_index_have_be_put;
 wire which_reg_should_be_replaced;
 wire split_finish; 
 
-////////注意每個index也是開到8bit是可以再優化，但因為寫法方便先暫用陣列
+/////
 reg [6:0] com_in1,com_in2;
 reg [5:0] TABLE_idx [6:1];
 reg [6:0] temp_cnt  [6:1];
@@ -219,9 +215,6 @@ always @ (*) begin
 			ns = code_valid_OUT;
 		code_valid_OUT:
 			ns = code_valid_OUT;
-		
-		done :
-			ns = done;
 
 		default : begin
 			ns = idle;
