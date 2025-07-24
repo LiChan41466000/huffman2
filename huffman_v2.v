@@ -33,10 +33,8 @@ parameter insert_ini_3   = 5'd18;  //
 parameter insert_3       = 5'd19;  //
 parameter insert_ini_4   = 5'd20;  //其實不需要這個狀態，只是方便程式可讀性以及方便共用combinational邏輯!
 parameter insert_4       = 5'd21;  //
-parameter split_1        = 5'd22;  //
-parameter split_2        = 5'd23;  //
-parameter split_3        = 5'd24;  //
-parameter split_4        = 5'd25;  //
+parameter insert_ini_5   = 5'd22;  //
+parameter split_1        = 5'd23;  //
 parameter split_5        = 5'd26;  //
 parameter code_valid_OUT = 5'd27;  //結束狀態
 
@@ -58,6 +56,7 @@ wire [5:0] merge_index;
 wire [6:0] which_one_have_be_put,  the_inverse_one_have_be_put;
 wire [5:0] which_index_have_be_put, the_inverse_index_have_be_put;
 wire which_reg_should_be_replaced;
+wire split_finish; 
 
 ////////注意每個index也是開到8bit是可以再優化，但因為寫法方便先暫用陣列
 reg [6:0] com_in1,com_in2;
@@ -202,20 +201,20 @@ always @ (*) begin
 			ns = insert_4;
 
 		insert_4 :
+			ns = insert_ini_5;
+
+		insert_ini_5 :
 			ns = split_1;
-		split_1:
+		
+		split_1: begin
 			if(split_finish) begin
 				ns = split_5;
 			end
 			else begin
 				ns = split_1;
 			end
-	//	split_2:
-	//		ns = split_3;
-	//	split_3:
-	//		ns = split_4;
-	//	split_4:
-	//		ns = split_5;
+		end
+
 		split_5:
 			ns = code_valid_OUT;
 		code_valid_OUT:
@@ -224,19 +223,9 @@ always @ (*) begin
 		done :
 			ns = done;
 
-		idle1 :
-			ns = idle1;
-
-		idle2 :
-			ns = idle2;
-
-		idle3 :
-			ns = idle3;
-
-
-		//default : begin
-		//	ns = idle;
-		//end				//寫滿狀態面積小
+		default : begin
+			ns = idle;
+		end				//寫滿狀態面積小
 	endcase
 end
 
@@ -341,10 +330,10 @@ always@(posedge clk) begin
 			TABLE_idx[4] <= which_index_have_be_put;
 		end
 		ini_sort_2_2_2: begin
-			CNT5[6:0] <= which_one_have_be_put;
+			CNT5[6:0]    <= which_one_have_be_put;
 			TABLE_idx[5] <= which_index_have_be_put;
-			CNT6[6:0] <= the_inverse_one_have_be_put;
-			TABLE_idx[5] <= the_inverse_index_have_be_put;
+			CNT6[6:0]    <= the_inverse_one_have_be_put;
+			TABLE_idx[6] <= the_inverse_index_have_be_put;
 		end
 		ini_sort_3_1 : 
 			case(which_reg_should_be_replaced)	
@@ -358,7 +347,7 @@ always@(posedge clk) begin
 				end
 				1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
 					CNT6[6:0] <= 7'd0;
-					TABLE_idx[6] <= 7'd0;
+					TABLE_idx[6] <= 6'd0;
 					CNT5[6:0] <= CNT6[6:0];
 					TABLE_idx[5] <= TABLE_idx[6];
 					CNT4[6:0] <= CNT5[6:0];
@@ -377,7 +366,7 @@ always@(posedge clk) begin
 				end
 				1'b0 : begin//代表temp [4]被放入table1內，故位移CNT[6-4]
 					CNT6[6:0] <= 7'd0;
-					TABLE_idx[6] <= 7'd0;
+					TABLE_idx[6] <= 6'd0;
 					CNT5[6:0] <= CNT6[6:0];
 					TABLE_idx[5] <= TABLE_idx[6];
 					CNT4[6:0] <= CNT5[6:0];
@@ -397,7 +386,7 @@ always@(posedge clk) begin
 				end
 				1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
 					CNT6[6:0] <= 7'd0;
-					TABLE_idx[6] <= 7'd0;
+					TABLE_idx[6] <= 6'd0;
 					CNT5[6:0] <= CNT6[6:0];
 					TABLE_idx[5] <= TABLE_idx[6];
 					CNT4[6:0] <= CNT5[6:0];
@@ -417,7 +406,7 @@ always@(posedge clk) begin
 					end
 					1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
 						CNT6[6:0] <= 7'd0;
-						TABLE_idx[6] <= 7'd0;
+						TABLE_idx[6] <= 6'd0;
 						CNT5[6:0] <= CNT6[6:0];
 						TABLE_idx[5] <= TABLE_idx[6];
 						CNT4[6:0] <= CNT5[6:0];
@@ -434,7 +423,7 @@ always@(posedge clk) begin
 			TABLE_idx[3] <= temp_idx[4];
 			CNT4[6:0]    <= temp_cnt[5];
 			TABLE_idx[4] <= temp_idx[5];
-			CNT5[6:0]    <= temp_cnt[5];
+			CNT5[6:0]    <= temp_cnt[6];
 			TABLE_idx[5] <= temp_idx[6];
 			CNT6[6:0]    <= 7'd0;
 			TABLE_idx[6] <= 6'd0;
@@ -700,7 +689,7 @@ always@(posedge clk) begin
 				end
 			end
 
-			ini_sort_2_2_1 : begin
+			ini_sort_2_2_1 : begin//!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				if(which_reg_should_be_replaced) begin //若成立代表[4]的被放進temp reg，故用[6]取代
 					temp_cnt[4] <= temp_cnt[6];
 					temp_idx[4] <= temp_idx[6];
@@ -737,7 +726,7 @@ always@(posedge clk) begin
 				end
 
 				else if (com2_is_zero_1) begin
-					temp_cnt[4] <= cnt1; 
+					temp_cnt[4] <= CNT1; 
 					temp_idx[4] <= TABLE_idx[1];
 					temp_cnt[5] <= CNT2; 
 					temp_idx[5] <= TABLE_idx[2];
@@ -918,7 +907,6 @@ end
 
 
 /////////symbol split////////
-wire split_finish; 
 reg split_1_finish, split_2_finish, split_3_finish, split_4_finish, split_5_finish, split_6_finish;
 assign split_finish = split_1_finish && split_2_finish && split_3_finish && split_4_finish && split_5_finish && split_6_finish;
 
@@ -1003,12 +991,240 @@ always@(posedge clk) begin
 
 			end
 
+			insert_ini_2: begin
+				if(temp_idx[1][0]) begin//若TABLE1最下方第0個BIT是1，HC1編1
+					HC1 <= {1'b1,HC1[7:1]};//右移
+					M1  <= {1'b1,M1[7:1]};
+				end
+				else if (temp_idx[2][0]) begin//若TABLE1倒數第二個元素第1個BIT是1，HC2編0
+					HC1 <= {1'b0,HC1[7:1]};//右移
+					M1  <= {1'b1,M1[7:1]};
+				end
+
+				if(temp_idx[1][1]) begin//若TABLE1最下方第0個BIT是1，HC1編1
+					HC2 <= {1'b1,HC2[7:1]};//右移
+					M2  <= {1'b1,M2[7:1]};
+				end
+				else if (temp_idx[2][1]) begin//若TABLE1倒數第二個元素第1個BIT是1，HC2編0
+					HC2 <= {1'b0,HC2[7:1]};//右移
+					M2  <= {1'b1,M2[7:1]};
+				end
+
+				if(temp_idx[1][2]) begin//若TABLE1最下方第2個BIT是1，HC3編1
+					HC3 <= {1'b1,HC3[7:1]};//右移
+					M3  <= {1'b1,M3[7:1]};
+				end
+				else if (temp_idx[2][2]) begin//若TABLE1倒數第二個元素第2個BIT是1，HC3編0
+					HC3 <= {1'b0,HC3[7:1]};//右移
+					M3  <= {1'b1,M3[7:1]};
+				end
+
+				if(temp_idx[1][3]) begin//若TABLE1最下方第3個BIT是1，HC4編1
+					HC4 <= {1'b1,HC4[7:1]};//右移
+					M4  <= {1'b1,M4[7:1]};
+				end
+				else if (temp_idx[2][3]) begin//若TABLE1倒數第二個元素第3個BIT是1，HC4編0
+					HC4 <= {1'b0,HC4[7:1]};//右移
+					M4  <= {1'b1,M4[7:1]};
+				end
+
+				if(temp_idx[1][4]) begin//若TABLE1最下方第4個BIT是1，HC5編1
+					HC5 <= {1'b1,HC5[7:1]};//右移
+					M5  <= {1'b1,M5[7:1]};
+				end
+				else if (temp_idx[2][4]) begin//若TABLE1倒數第二個元素第4個BIT是1，HC5編0
+					HC5 <= {1'b0,HC5[7:1]};//右移
+					M5  <= {1'b1,M5[7:1]};
+				end
+
+				if(temp_idx[1][5]) begin//若TABLE1最下方第5個BIT是1，HC6編1
+					HC6 <= {1'b1,HC6[7:1]};//右移
+					M6  <= {1'b1,M6[7:1]};
+				end
+				else if (temp_idx[2][5]) begin//若TABLE1倒數第二個元素第5個BIT是1，HC6編0
+					HC6 <= {1'b0,HC6[7:1]};//右移
+					M6  <= {1'b1,M6[7:1]};
+				end
+
+			end
+
+			insert_ini_3: begin
+				if(temp_idx[1][0]) begin//若TABLE1最下方第0個BIT是1，HC1編1
+					HC1 <= {1'b1,HC1[7:1]};//右移
+					M1  <= {1'b1,M1[7:1]};
+				end
+				else if (temp_idx[2][0]) begin//若TABLE1倒數第二個元素第1個BIT是1，HC2編0
+					HC1 <= {1'b0,HC1[7:1]};//右移
+					M1  <= {1'b1,M1[7:1]};
+				end
+
+				if(temp_idx[1][1]) begin//若TABLE1最下方第0個BIT是1，HC1編1
+					HC2 <= {1'b1,HC2[7:1]};//右移
+					M2  <= {1'b1,M2[7:1]};
+				end
+				else if (temp_idx[2][1]) begin//若TABLE1倒數第二個元素第1個BIT是1，HC2編0
+					HC2 <= {1'b0,HC2[7:1]};//右移
+					M2  <= {1'b1,M2[7:1]};
+				end
+
+				if(temp_idx[1][2]) begin//若TABLE1最下方第2個BIT是1，HC3編1
+					HC3 <= {1'b1,HC3[7:1]};//右移
+					M3  <= {1'b1,M3[7:1]};
+				end
+				else if (temp_idx[2][2]) begin//若TABLE1倒數第二個元素第2個BIT是1，HC3編0
+					HC3 <= {1'b0,HC3[7:1]};//右移
+					M3  <= {1'b1,M3[7:1]};
+				end
+
+				if(temp_idx[1][3]) begin//若TABLE1最下方第3個BIT是1，HC4編1
+					HC4 <= {1'b1,HC4[7:1]};//右移
+					M4  <= {1'b1,M4[7:1]};
+				end
+				else if (temp_idx[2][3]) begin//若TABLE1倒數第二個元素第3個BIT是1，HC4編0
+					HC4 <= {1'b0,HC4[7:1]};//右移
+					M4  <= {1'b1,M4[7:1]};
+				end
+
+				if(temp_idx[1][4]) begin//若TABLE1最下方第4個BIT是1，HC5編1
+					HC5 <= {1'b1,HC5[7:1]};//右移
+					M5  <= {1'b1,M5[7:1]};
+				end
+				else if (temp_idx[2][4]) begin//若TABLE1倒數第二個元素第4個BIT是1，HC5編0
+					HC5 <= {1'b0,HC5[7:1]};//右移
+					M5  <= {1'b1,M5[7:1]};
+				end
+
+				if(temp_idx[1][5]) begin//若TABLE1最下方第5個BIT是1，HC6編1
+					HC6 <= {1'b1,HC6[7:1]};//右移
+					M6  <= {1'b1,M6[7:1]};
+				end
+				else if (temp_idx[2][5]) begin//若TABLE1倒數第二個元素第5個BIT是1，HC6編0
+					HC6 <= {1'b0,HC6[7:1]};//右移
+					M6  <= {1'b1,M6[7:1]};
+				end
+
+			end
+
+			insert_ini_4: begin
+				if(temp_idx[1][0]) begin//若TABLE1最下方第0個BIT是1，HC1編1
+					HC1 <= {1'b1,HC1[7:1]};//右移
+					M1  <= {1'b1,M1[7:1]};
+				end
+				else if (temp_idx[2][0]) begin//若TABLE1倒數第二個元素第1個BIT是1，HC2編0
+					HC1 <= {1'b0,HC1[7:1]};//右移
+					M1  <= {1'b1,M1[7:1]};
+				end
+
+				if(temp_idx[1][1]) begin//若TABLE1最下方第0個BIT是1，HC1編1
+					HC2 <= {1'b1,HC2[7:1]};//右移
+					M2  <= {1'b1,M2[7:1]};
+				end
+				else if (temp_idx[2][1]) begin//若TABLE1倒數第二個元素第1個BIT是1，HC2編0
+					HC2 <= {1'b0,HC2[7:1]};//右移
+					M2  <= {1'b1,M2[7:1]};
+				end
+
+				if(temp_idx[1][2]) begin//若TABLE1最下方第2個BIT是1，HC3編1
+					HC3 <= {1'b1,HC3[7:1]};//右移
+					M3  <= {1'b1,M3[7:1]};
+				end
+				else if (temp_idx[2][2]) begin//若TABLE1倒數第二個元素第2個BIT是1，HC3編0
+					HC3 <= {1'b0,HC3[7:1]};//右移
+					M3  <= {1'b1,M3[7:1]};
+				end
+
+				if(temp_idx[1][3]) begin//若TABLE1最下方第3個BIT是1，HC4編1
+					HC4 <= {1'b1,HC4[7:1]};//右移
+					M4  <= {1'b1,M4[7:1]};
+				end
+				else if (temp_idx[2][3]) begin//若TABLE1倒數第二個元素第3個BIT是1，HC4編0
+					HC4 <= {1'b0,HC4[7:1]};//右移
+					M4  <= {1'b1,M4[7:1]};
+				end
+
+				if(temp_idx[1][4]) begin//若TABLE1最下方第4個BIT是1，HC5編1
+					HC5 <= {1'b1,HC5[7:1]};//右移
+					M5  <= {1'b1,M5[7:1]};
+				end
+				else if (temp_idx[2][4]) begin//若TABLE1倒數第二個元素第4個BIT是1，HC5編0
+					HC5 <= {1'b0,HC5[7:1]};//右移
+					M5  <= {1'b1,M5[7:1]};
+				end
+
+				if(temp_idx[1][5]) begin//若TABLE1最下方第5個BIT是1，HC6編1
+					HC6 <= {1'b1,HC6[7:1]};//右移
+					M6  <= {1'b1,M6[7:1]};
+				end
+				else if (temp_idx[2][5]) begin//若TABLE1倒數第二個元素第5個BIT是1，HC6編0
+					HC6 <= {1'b0,HC6[7:1]};//右移
+					M6  <= {1'b1,M6[7:1]};
+				end
+
+			end
+
+			insert_ini_5 : begin
+				if(temp_idx[1][0]) begin//若TABLE1最下方第0個BIT是1，HC1編1
+					HC1 <= {1'b1,HC1[7:1]};//右移
+					M1  <= {1'b1,M1[7:1]};
+				end
+				else if (temp_idx[2][0]) begin//若TABLE1倒數第二個元素第1個BIT是1，HC2編0
+					HC1 <= {1'b0,HC1[7:1]};//右移
+					M1  <= {1'b1,M1[7:1]};
+				end
+
+				if(temp_idx[1][1]) begin//若TABLE1最下方第0個BIT是1，HC1編1
+					HC2 <= {1'b1,HC2[7:1]};//右移
+					M2  <= {1'b1,M2[7:1]};
+				end
+				else if (temp_idx[2][1]) begin//若TABLE1倒數第二個元素第1個BIT是1，HC2編0
+					HC2 <= {1'b0,HC2[7:1]};//右移
+					M2  <= {1'b1,M2[7:1]};
+				end
+
+				if(temp_idx[1][2]) begin//若TABLE1最下方第2個BIT是1，HC3編1
+					HC3 <= {1'b1,HC3[7:1]};//右移
+					M3  <= {1'b1,M3[7:1]};
+				end
+				else if (temp_idx[2][2]) begin//若TABLE1倒數第二個元素第2個BIT是1，HC3編0
+					HC3 <= {1'b0,HC3[7:1]};//右移
+					M3  <= {1'b1,M3[7:1]};
+				end
+
+				if(temp_idx[1][3]) begin//若TABLE1最下方第3個BIT是1，HC4編1
+					HC4 <= {1'b1,HC4[7:1]};//右移
+					M4  <= {1'b1,M4[7:1]};
+				end
+				else if (temp_idx[2][3]) begin//若TABLE1倒數第二個元素第3個BIT是1，HC4編0
+					HC4 <= {1'b0,HC4[7:1]};//右移
+					M4  <= {1'b1,M4[7:1]};
+				end
+
+				if(temp_idx[1][4]) begin//若TABLE1最下方第4個BIT是1，HC5編1
+					HC5 <= {1'b1,HC5[7:1]};//右移
+					M5  <= {1'b1,M5[7:1]};
+				end
+				else if (temp_idx[2][4]) begin//若TABLE1倒數第二個元素第4個BIT是1，HC5編0
+					HC5 <= {1'b0,HC5[7:1]};//右移
+					M5  <= {1'b1,M5[7:1]};
+				end
+
+				if(temp_idx[1][5]) begin//若TABLE1最下方第5個BIT是1，HC6編1
+					HC6 <= {1'b1,HC6[7:1]};//右移
+					M6  <= {1'b1,M6[7:1]};
+				end
+				else if (temp_idx[2][5]) begin//若TABLE1倒數第二個元素第5個BIT是1，HC6編0
+					HC6 <= {1'b0,HC6[7:1]};//右移
+					M6  <= {1'b1,M6[7:1]};
+				end
+			end
+
+
 			split_1 : begin
 				if(!M1[0]) begin
 					HC1 <= {1'b0,HC1[7:1]};//右移塞0
 					M1  <= {1'b0,M1[7:1]};//右移塞0
 				end
-				else begin
+				else if (M1[0])begin
 					split_1_finish <= 1'd1;
 				end
 
@@ -1016,7 +1232,7 @@ always@(posedge clk) begin
 					HC2 <= {1'b0,HC2[7:1]};//右移塞0
 					M2  <= {1'b0,M2[7:1]};//右移塞0
 				end
-				else begin
+				else if (M2[0])begin
 					split_2_finish <= 1'd1;
 				end
 
@@ -1024,7 +1240,7 @@ always@(posedge clk) begin
 					HC3 <= {1'b0,HC3[7:1]};//右移塞0
 					M3  <= {1'b0,M3[7:1]};//右移塞0
 				end
-				else begin
+				else if (M3[0])begin
 					split_3_finish <= 1'd1;
 				end
 
@@ -1032,7 +1248,7 @@ always@(posedge clk) begin
 					HC4 <= {1'b0,HC4[7:1]};//右移塞0
 					M4  <= {1'b0,M4[7:1]};//右移塞0
 				end
-				else begin
+				else if (M4[0])begin
 					split_4_finish <= 1'd1;
 				end
 
@@ -1040,7 +1256,7 @@ always@(posedge clk) begin
 					HC5 <= {1'b0,HC5[7:1]};//右移塞0
 					M5  <= {1'b0,M5[7:1]};//右移塞0
 				end
-				else begin
+				else if (M5[0])begin
 					split_5_finish <= 1'd1;
 				end
 
@@ -1048,7 +1264,7 @@ always@(posedge clk) begin
 					HC6 <= {1'b0,HC6[7:1]};//右移塞0
 					M6  <= {1'b0,M6[7:1]};//右移塞0
 				end
-				else begin
+				else if (M6[0])begin
 					split_6_finish <= 1'd1;
 				end
 			end
@@ -1056,6 +1272,24 @@ always@(posedge clk) begin
 	end
 
 end
+
+wire [5:0] TEMP6,TEMP5,TEMP4,TEMP3,TEMP2,TEMP1;
+assign TEMP6 = temp_idx[6];
+assign TEMP5 = temp_idx[5];
+assign TEMP4 = temp_idx[4];
+assign TEMP3 = temp_idx[3];
+assign TEMP2 = temp_idx[2];
+assign TEMP1 = temp_idx[1];
+
+wire [5:0] T6,T5,T4,T3,T2,T1;
+assign T6 = TABLE_idx[6];
+assign T5 = TABLE_idx[5];
+assign T4 = TABLE_idx[4];
+assign T3 = TABLE_idx[3];
+assign T2 = TABLE_idx[2];
+assign T1 = TABLE_idx[1];
+
+
 
 endmodule
 
