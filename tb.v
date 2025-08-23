@@ -116,11 +116,11 @@ initial begin
      i = 0;
   #(`CLK_period*5);
   @(negedge CLK) gray_valid = 1'b1;
-  gray_data = pat_mem[i];
+  gray_data = pat_mem[i][2:0];
   for (i=1;i<100;i=i+1)
-    @(negedge CLK) gray_data = pat_mem[i];
+    @(negedge CLK) gray_data = pat_mem[i][2:0];
   @(negedge CLK) gray_valid = 1'b0;
-       gray_data = 8'b0;
+       gray_data = 3'b0;
 end
 
 initial begin

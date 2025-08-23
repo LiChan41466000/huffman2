@@ -4,7 +4,7 @@ module huffman(clk, reset,gray_data , gray_valid, CNT_valid, CNT1, CNT2, CNT3, C
 input clk;
 input reset;
 input gray_valid;
-input [7:0] gray_data;
+input [2:0] gray_data;
 output reg CNT_valid;	
 output reg [7:0] CNT1, CNT2, CNT3, CNT4, CNT5, CNT6;
 output reg code_valid;
@@ -275,7 +275,7 @@ always@(posedge clk) begin
 		TABLE_idx[6] <= 6'd0;
 	end
 	else if (gray_valid)
-		case(gray_data[2:0]) 
+		case(gray_data) 
 		3'd1 : CNT1 <= CNT1 + 1;
 		3'd2 : CNT2 <= CNT2 + 1;
 		3'd3 : CNT3 <= CNT3 + 1;
