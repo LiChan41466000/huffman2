@@ -39,10 +39,8 @@ parameter split_5        = 5'd24;  //
 parameter code_valid_OUT = 5'd25;  //結束狀態
 
 //============================================
-reg [4:0] cs,ns;
-reg ini_sort_3_finish,insert_3_finish,insert_1_finish,insert_2_finish;
-
-//sorting module//////
+wire ini_sort_3_finish;
+wire insert_1_finish,insert_3_finish,insert_2_finish;
 wire com_out_1;
 wire equal_signal_1;
 wire com1_is_zero_1;
@@ -53,23 +51,20 @@ wire [6:0] which_one_have_be_put,  the_inverse_one_have_be_put;
 wire [5:0] which_index_have_be_put, the_inverse_index_have_be_put;
 wire which_reg_should_be_replaced;
 wire split_finish; 
+wire [6:0] merge_cnt_1,merge_cnt_2;
+wire [5:0] merge_index_1,merge_index_2;
 
 /////
+reg [4:0] cs,ns;
 reg [6:0] com_in1,com_in2;
 reg [5:0] TABLE_idx [6:1];
 reg [6:0] temp_cnt  [6:1];
 reg [5:0] temp_idx  [6:1];
-
-
-
-wire [6:0] merge_cnt_1,merge_cnt_2;
-wire [5:0] merge_index_1,merge_index_2;
+reg [5:0] com_index_2,com_index_1;
 
 
 
 ////判斷邏輯////共用部分////
-reg [5:0] com_index_2,com_index_1;
-//com_set_1////
 assign com_out_1 = (com_in1 < com_in2);
 assign equal_signal_1 = (com_in1 == com_in2);
 assign com_index = (com_index_1 < com_index_2);//機率一樣時，大的放下面
@@ -92,12 +87,12 @@ assign merge_index = temp_idx[1] | temp_idx[2];
 
 
 
-parameter symbol1 		= 6'b000001;
-parameter symbol2 		= 6'b000010;
-parameter symbol3 		= 6'b000100;
-parameter symbol4 		= 6'b001000;
-parameter symbol5 		= 6'b010000;
-parameter symbol6 		= 6'b100000;
+parameter symbol1 	= 6'b000001;
+parameter symbol2 	= 6'b000010;
+parameter symbol3 	= 6'b000100;
+parameter symbol4 	= 6'b001000;
+parameter symbol5 	= 6'b010000;
+parameter symbol6 	= 6'b100000;
 
 // =========================================== INDEX ==========================================
 	//  - FSM done
@@ -290,7 +285,7 @@ always@(posedge clk) begin
 		endcase
 
 
-	if(cs == insert_1 || cs == insert_2 || cs == insert_3 || cs == insert_4) begin
+	else if(cs == insert_1 || cs == insert_2 || cs == insert_3 || cs == insert_4) begin
 		if(com1_is_zero_1 && !com2_is_zero_1) begin //代表合併項已經被放入temp_idx、_cnt，CNT6:2直接右移，CNT2要放進temp_cnt2
 			CNT6[6:0]    <= 7'd0;
 			TABLE_idx[6] <= 6'd0;
@@ -323,88 +318,29 @@ always@(posedge clk) begin
 			TABLE_idx[2] <= TABLE_idx[3];
 		end
 	end
-
-	case(cs)
-		ini_sort_2_1_1: begin
-			CNT1[6:0] <= which_one_have_be_put; 
-			TABLE_idx[1] <= which_index_have_be_put;
-		end
-		ini_sort_2_1_2: begin
-			CNT2[6:0] <= which_one_have_be_put;
-			TABLE_idx[2] <= which_index_have_be_put;
-			CNT3[6:0] <= the_inverse_one_have_be_put;
-			TABLE_idx[3] <= the_inverse_index_have_be_put;
-		end
-		ini_sort_2_2_1 : begin
-			CNT4[6:0] <= which_one_have_be_put;
-			TABLE_idx[4] <= which_index_have_be_put;
-		end
-		ini_sort_2_2_2: begin
-			CNT5[6:0]    <= which_one_have_be_put;
-			TABLE_idx[5] <= which_index_have_be_put;
-			CNT6[6:0]    <= the_inverse_one_have_be_put;
-			TABLE_idx[6] <= the_inverse_index_have_be_put;
-		end
-		ini_sort_3_1 : 
-			case(which_reg_should_be_replaced)	
-				1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
-					CNT3[6:0] <= 7'd0;
-					TABLE_idx[3] <= 6'd0;
-					CNT2[6:0] <= CNT3[6:0];
-					TABLE_idx[2] <= TABLE_idx[3];
-					CNT1[6:0] <= CNT2[6:0];
-					TABLE_idx[1] <= TABLE_idx[2];
-				end
-				1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
-					CNT6[6:0] <= 7'd0;
-					TABLE_idx[6] <= 6'd0;
-					CNT5[6:0] <= CNT6[6:0];
-					TABLE_idx[5] <= TABLE_idx[6];
-					CNT4[6:0] <= CNT5[6:0];
-					TABLE_idx[4] <= TABLE_idx[5];
-				end
-			endcase
-		ini_sort_3_2 : begin
-			case(which_reg_should_be_replaced)	
-				1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
-					CNT3[6:0] <= 7'd0;
-					TABLE_idx[3] <= 6'd0;
-					CNT2[6:0] <= CNT3[6:0];
-					TABLE_idx[2] <= TABLE_idx[3];
-					CNT1[6:0] <= CNT2[6:0];
-					TABLE_idx[1] <= TABLE_idx[2];
-				end
-				1'b0 : begin//代表temp [4]被放入table1內，故位移CNT[6-4]
-					CNT6[6:0] <= 7'd0;
-					TABLE_idx[6] <= 6'd0;
-					CNT5[6:0] <= CNT6[6:0];
-					TABLE_idx[5] <= TABLE_idx[6];
-					CNT4[6:0] <= CNT5[6:0];
-					TABLE_idx[4] <= TABLE_idx[5];
-				end
-			endcase
-		end
-		ini_sort_3_3 : begin
-			case(which_reg_should_be_replaced)	
-				1'b1 : begin//成立代表temp[1]被放入table1內，故位移CNT3-1
-					CNT3[6:0] <= 7'd0;
-					TABLE_idx[3] <= 6'd0;
-					CNT2[6:0] <= CNT3[6:0];
-					TABLE_idx[2] <= TABLE_idx[3];
-					CNT1[6:0] <= CNT2[6:0];
-					TABLE_idx[1] <= TABLE_idx[2];
-				end
-				1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
-					CNT6[6:0] <= 7'd0;
-					TABLE_idx[6] <= 6'd0;
-					CNT5[6:0] <= CNT6[6:0];
-					TABLE_idx[5] <= TABLE_idx[6];
-					CNT4[6:0] <= CNT5[6:0];
-					TABLE_idx[4] <= TABLE_idx[5];
-				end
-			endcase
-		end
-		ini_sort_3_4 : begin
+	else begin
+		case(cs)
+			ini_sort_2_1_1: begin
+				CNT1[6:0] <= which_one_have_be_put; 
+				TABLE_idx[1] <= which_index_have_be_put;
+			end
+			ini_sort_2_1_2: begin
+				CNT2[6:0] <= which_one_have_be_put;
+				TABLE_idx[2] <= which_index_have_be_put;
+				CNT3[6:0] <= the_inverse_one_have_be_put;
+				TABLE_idx[3] <= the_inverse_index_have_be_put;
+			end
+			ini_sort_2_2_1 : begin
+				CNT4[6:0] <= which_one_have_be_put;
+				TABLE_idx[4] <= which_index_have_be_put;
+			end
+			ini_sort_2_2_2: begin
+				CNT5[6:0]    <= which_one_have_be_put;
+				TABLE_idx[5] <= which_index_have_be_put;
+				CNT6[6:0]    <= the_inverse_one_have_be_put;
+				TABLE_idx[6] <= the_inverse_index_have_be_put;
+			end
+			ini_sort_3_1 : 
 				case(which_reg_should_be_replaced)	
 					1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
 						CNT3[6:0] <= 7'd0;
@@ -423,64 +359,124 @@ always@(posedge clk) begin
 						TABLE_idx[4] <= TABLE_idx[5];
 					end
 				endcase
+			ini_sort_3_2 : begin
+				case(which_reg_should_be_replaced)	
+					1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
+						CNT3[6:0] <= 7'd0;
+						TABLE_idx[3] <= 6'd0;
+						CNT2[6:0] <= CNT3[6:0];
+						TABLE_idx[2] <= TABLE_idx[3];
+						CNT1[6:0] <= CNT2[6:0];
+						TABLE_idx[1] <= TABLE_idx[2];
+					end
+					1'b0 : begin//代表temp [4]被放入table1內，故位移CNT[6-4]
+						CNT6[6:0] <= 7'd0;
+						TABLE_idx[6] <= 6'd0;
+						CNT5[6:0] <= CNT6[6:0];
+						TABLE_idx[5] <= TABLE_idx[6];
+						CNT4[6:0] <= CNT5[6:0];
+						TABLE_idx[4] <= TABLE_idx[5];
+					end
+				endcase
 			end
-		insert_ini_1 : begin
-			CNT1[6:0]    <= merge_cnt;
-			TABLE_idx[1] <= merge_index;
-			CNT2[6:0]    <= temp_cnt[3];
-			TABLE_idx[2] <= temp_idx[3];
-			CNT3[6:0]    <= temp_cnt[4];
-			TABLE_idx[3] <= temp_idx[4];
-			CNT4[6:0]    <= temp_cnt[5];
-			TABLE_idx[4] <= temp_idx[5];
-			CNT5[6:0]    <= temp_cnt[6];
-			TABLE_idx[5] <= temp_idx[6];
-			CNT6[6:0]    <= 7'd0;
-			TABLE_idx[6] <= 6'd0;
-		end
-		insert_ini_2 : begin
-			CNT1[6:0]    <= merge_cnt;
-			TABLE_idx[1] <= merge_index;
-			CNT2[6:0]    <= temp_cnt[3];
-			TABLE_idx[2] <= temp_idx[3];
-			CNT3[6:0]    <= temp_cnt[4];
-			TABLE_idx[3] <= temp_idx[4];
-			CNT4[6:0]    <= temp_cnt[5];
-			TABLE_idx[4] <= temp_idx[5];
-			CNT5[6:0]    <= 7'd0;
-			TABLE_idx[5] <= 6'd0;
-			CNT6[6:0]    <= 7'd0;
-			TABLE_idx[6] <= 6'd0;
-		end
-		insert_ini_3 : begin
-			CNT1[6:0]    <= merge_cnt;
-			TABLE_idx[1] <= merge_index;
-			CNT2[6:0]    <= temp_cnt[3];
-			TABLE_idx[2] <= temp_idx[3];
-			CNT3[6:0]    <= temp_cnt[4];
-			TABLE_idx[3] <= temp_idx[4];
-			CNT4[6:0]    <= 7'd0;
-			TABLE_idx[4] <= 6'd0;
-			CNT5[6:0]    <= 7'd0;
-			TABLE_idx[5] <= 6'd0;
-			CNT6[6:0]    <= 7'd0;
-			TABLE_idx[6] <= 6'd0;
-		end
-		insert_ini_4 : begin
-			CNT1[6:0]    <= merge_cnt;
-			TABLE_idx[1] <= merge_index;
-			CNT2[6:0]    <= temp_cnt[3];
-			TABLE_idx[2] <= temp_idx[3];
-			CNT3[6:0]    <= 7'd0;
-			TABLE_idx[3] <= 6'd0;
-			CNT4[6:0]    <= 7'd0;
-			TABLE_idx[4] <= 6'd0;
-			CNT5[6:0]    <= 7'd0;
-			TABLE_idx[5] <= 6'd0;
-			CNT6[6:0]    <= 7'd0;
-			TABLE_idx[6] <= 6'd0;
-		end
-	endcase
+			ini_sort_3_3 : begin
+				case(which_reg_should_be_replaced)	
+					1'b1 : begin//成立代表temp[1]被放入table1內，故位移CNT3-1
+						CNT3[6:0] <= 7'd0;
+						TABLE_idx[3] <= 6'd0;
+						CNT2[6:0] <= CNT3[6:0];
+						TABLE_idx[2] <= TABLE_idx[3];
+						CNT1[6:0] <= CNT2[6:0];
+						TABLE_idx[1] <= TABLE_idx[2];
+					end
+					1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
+						CNT6[6:0] <= 7'd0;
+						TABLE_idx[6] <= 6'd0;
+						CNT5[6:0] <= CNT6[6:0];
+						TABLE_idx[5] <= TABLE_idx[6];
+						CNT4[6:0] <= CNT5[6:0];
+						TABLE_idx[4] <= TABLE_idx[5];
+					end
+				endcase
+			end
+			ini_sort_3_4 : begin
+					case(which_reg_should_be_replaced)	
+						1'b1 : begin//成立代表temp[1]被放入table1內，故位移temp[3-1]
+							CNT3[6:0] <= 7'd0;
+							TABLE_idx[3] <= 6'd0;
+							CNT2[6:0] <= CNT3[6:0];
+							TABLE_idx[2] <= TABLE_idx[3];
+							CNT1[6:0] <= CNT2[6:0];
+							TABLE_idx[1] <= TABLE_idx[2];
+						end
+						1'b0 : begin//代表temp [4]被放入table1內，故位移temp[6-4]
+							CNT6[6:0] <= 7'd0;
+							TABLE_idx[6] <= 6'd0;
+							CNT5[6:0] <= CNT6[6:0];
+							TABLE_idx[5] <= TABLE_idx[6];
+							CNT4[6:0] <= CNT5[6:0];
+							TABLE_idx[4] <= TABLE_idx[5];
+						end
+					endcase
+				end
+			insert_ini_1 : begin
+				CNT1[6:0]    <= merge_cnt;
+				TABLE_idx[1] <= merge_index;
+				CNT2[6:0]    <= temp_cnt[3];
+				TABLE_idx[2] <= temp_idx[3];
+				CNT3[6:0]    <= temp_cnt[4];
+				TABLE_idx[3] <= temp_idx[4];
+				CNT4[6:0]    <= temp_cnt[5];
+				TABLE_idx[4] <= temp_idx[5];
+				CNT5[6:0]    <= temp_cnt[6];
+				TABLE_idx[5] <= temp_idx[6];
+				CNT6[6:0]    <= 7'd0;
+				TABLE_idx[6] <= 6'd0;
+			end
+			insert_ini_2 : begin
+				CNT1[6:0]    <= merge_cnt;
+				TABLE_idx[1] <= merge_index;
+				CNT2[6:0]    <= temp_cnt[3];
+				TABLE_idx[2] <= temp_idx[3];
+				CNT3[6:0]    <= temp_cnt[4];
+				TABLE_idx[3] <= temp_idx[4];
+				CNT4[6:0]    <= temp_cnt[5];
+				TABLE_idx[4] <= temp_idx[5];
+				CNT5[6:0]    <= 7'd0;
+				TABLE_idx[5] <= 6'd0;
+				CNT6[6:0]    <= 7'd0;
+				TABLE_idx[6] <= 6'd0;
+			end
+			insert_ini_3 : begin
+				CNT1[6:0]    <= merge_cnt;
+				TABLE_idx[1] <= merge_index;
+				CNT2[6:0]    <= temp_cnt[3];
+				TABLE_idx[2] <= temp_idx[3];
+				CNT3[6:0]    <= temp_cnt[4];
+				TABLE_idx[3] <= temp_idx[4];
+				CNT4[6:0]    <= 7'd0;
+				TABLE_idx[4] <= 6'd0;
+				CNT5[6:0]    <= 7'd0;
+				TABLE_idx[5] <= 6'd0;
+				CNT6[6:0]    <= 7'd0;
+				TABLE_idx[6] <= 6'd0;
+			end
+			insert_ini_4 : begin
+				CNT1[6:0]    <= merge_cnt;
+				TABLE_idx[1] <= merge_index;
+				CNT2[6:0]    <= temp_cnt[3];
+				TABLE_idx[2] <= temp_idx[3];
+				CNT3[6:0]    <= 7'd0;
+				TABLE_idx[3] <= 6'd0;
+				CNT4[6:0]    <= 7'd0;
+				TABLE_idx[4] <= 6'd0;
+				CNT5[6:0]    <= 7'd0;
+				TABLE_idx[5] <= 6'd0;
+				CNT6[6:0]    <= 7'd0;
+				TABLE_idx[6] <= 6'd0;
+			end
+		endcase
+	end
 end
  
 //code valid///////////////
@@ -576,74 +572,15 @@ endcase
 end
 
 //ini_sort_3_finish
-always@(*) begin
-	case(cs)
-		ini_sort_3_4: begin
-			if(!(|TABLE_idx[1]) || !(|TABLE_idx[4])) begin //先判斷是否兩組比較暫存是否有一組全0,若有拉起結束訊號
-				ini_sort_3_finish <=1'd1;
-			end
-			else begin
-				ini_sort_3_finish <=1'd0;
-			end
-		end
-
-		default :
-			ini_sort_3_finish <=1'd0;
-	endcase
-end
-
+assign ini_sort_3_finish = (cs == ini_sort_3_4)? (!(|TABLE_idx[1]) || !(|TABLE_idx[4])) : 1'd0;
 //insert_1_finish
-always@(*) begin
-	case(cs)
-		insert_1 : begin
-			if(com1_is_zero_1 && com2_is_zero_1) begin
-				insert_1_finish <= 1'd1;
-			end
-			else begin
-				insert_1_finish <= 1'd0;
-			end
-		end
-		default : begin
-			insert_1_finish <= 1'd0;
-		end
-
-	endcase
-end
-
+assign insert_1_finish = (cs == insert_1)? (com1_is_zero_1 && com2_is_zero_1) : 1'd0; //面積沒變
 //insert_2_finish
-always@(*) begin
-	case(cs)
-		insert_2 : begin
-			if(com1_is_zero_1 && com2_is_zero_1) begin
-				insert_2_finish <= 1'd1;
-			end
-			else begin
-				insert_2_finish <= 1'd0;
-			end
-		end
-		default : begin
-			insert_2_finish <= 1'd0;
-		end
+assign insert_2_finish = (cs == insert_2)? (com1_is_zero_1 && com2_is_zero_1) : 1'd0;
+//insert_3_finish
+assign insert_3_finish = (cs == insert_3)? (com1_is_zero_1 && com2_is_zero_1) : 1'd0;
 
-	endcase
-end
-//		insert_3_finish
-always@(*) begin
-	case(cs)
-		insert_3 :  begin
-			if(com1_is_zero_1 && com2_is_zero_1) begin
-				insert_3_finish <= 1'd1;
-			end
-			else begin
-				insert_3_finish <= 1'd0;
-			end
-		end
-		default : begin
-			insert_3_finish <= 1'd0;
-		end
 
-	endcase
-end
 
 ///temp_cnt & temp_idx //
 integer i;
@@ -1277,21 +1214,21 @@ always@(posedge clk) begin
 
 end
 
-wire [5:0] TEMP6,TEMP5,TEMP4,TEMP3,TEMP2,TEMP1;
-assign TEMP6 = temp_idx[6];
-assign TEMP5 = temp_idx[5];
-assign TEMP4 = temp_idx[4];
-assign TEMP3 = temp_idx[3];
-assign TEMP2 = temp_idx[2];
-assign TEMP1 = temp_idx[1];
-
-wire [5:0] T6,T5,T4,T3,T2,T1;
-assign T6 = TABLE_idx[6];
-assign T5 = TABLE_idx[5];
-assign T4 = TABLE_idx[4];
-assign T3 = TABLE_idx[3];
-assign T2 = TABLE_idx[2];
-assign T1 = TABLE_idx[1];
+//wire [5:0] TEMP6,TEMP5,TEMP4,TEMP3,TEMP2,TEMP1;
+//assign TEMP6 = temp_idx[6];
+//assign TEMP5 = temp_idx[5];
+//assign TEMP4 = temp_idx[4];
+//assign TEMP3 = temp_idx[3];
+//assign TEMP2 = temp_idx[2];
+//assign TEMP1 = temp_idx[1];
+//
+//wire [5:0] T6,T5,T4,T3,T2,T1;
+//assign T6 = TABLE_idx[6];
+//assign T5 = TABLE_idx[5];
+//assign T4 = TABLE_idx[4];
+//assign T3 = TABLE_idx[3];
+//assign T2 = TABLE_idx[2];
+//assign T1 = TABLE_idx[1];
 
 
 
