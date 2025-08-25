@@ -1,25 +1,273 @@
-//module huffman_TM ();
-//
-//
-//
-//
-//endmodule
+module huffman_TM (clk, reset, gray_data, gray_valid, CNT_valid_buf, CNT_O, HC_O, M_O,code_valid, DT_O_buf);
+input clk;
+input reset;
+input gray_valid;
+input [2:0] gray_data;
+output reg CNT_valid_buf;
+output reg CNT_O;
+output reg HC_O;
+output reg M_O;
+output code_valid;
+output reg [1:0] DT_O_buf; //00 : nothing ;01 : CNT ; 10 :result
+//----huffman_TM to huffman
+wire [7:0] CNT1_i, CNT2_i, CNT3_i, CNT4_i, CNT5_i, CNT6_i;
+wire [7:0] HC1_i, HC2_i, HC3_i, HC4_i, HC5_i, HC6_i;
+wire [7:0] M1_i, M2_i, M3_i, M4_i, M5_i, M6_i;
+wire [1:0] DT_i;
+wire CNT_valid;
+reg TD_i;//負緣
+//----huffman connected wire
+wire [47:0] CNT_temp;
+wire [47:0] HC_temp;
+wire [47:0] M_temp;
+reg  [47:0] CNT_O_shift;
+reg  [47:0] HC_O_shift;
+reg  [47:0] M_O_shift;
+reg  [1:0]  DT_O;
+
+
+assign CNT_temp = {CNT1_i, CNT2_i, CNT3_i, CNT4_i, CNT5_i, CNT6_i};
+assign HC_temp = {HC1_i, HC2_i , HC3_i , HC4_i, HC5_i, HC6_i};
+assign M_temp = {M1_i, M2_i , M3_i , M4_i, M5_i, M6_i};
+//----count
+reg [5:0] send_count;
+
+huffman u_huffman(
+					.clk(clk),
+					.reset(reset),
+					.gray_data(gray_data),
+					.gray_valid(gray_valid),
+					.CNT_valid(CNT_valid),
+					.CNT1(CNT1_i),
+					.CNT2(CNT2_i),
+					.CNT3(CNT3_i),
+					.CNT4(CNT4_i),
+					.CNT5(CNT5_i),
+					.CNT6(CNT6_i),
+					.code_valid(code_valid),
+					.HC1(HC1_i),
+					.HC2(HC2_i),
+					.HC3(HC3_i),
+					.HC4(HC4_i),
+					.HC5(HC5_i),
+					.HC6(HC6_i),
+					.M1(M1_i),
+					.M2(M2_i),
+					.M3(M3_i),
+					.M4(M4_i),
+					.M5(M5_i),
+					.M6(M6_i),
+					.TD(TD_i),
+					.DT(DT_i)
+);
+
+//CNT_valid_buf
+always@(negedge clk) begin
+	if(reset) begin
+		CNT_valid_buf <= 1'd0;
+	end
+	else begin
+		CNT_valid_buf <= CNT_valid;
+	end
+end
+
+//TD_i
+always@(negedge clk) begin
+	if (reset) begin
+		TD_i <= 1'd0;
+	end
+	else begin
+		case(DT_i)
+			2'b00 : begin
+				TD_i <= 1'd0;
+			end
+			2'b01 : begin
+				TD_i <= (send_count == 48)?1'd1:1'd0; 
+			end
+			2'b10 : begin
+				TD_i <= (send_count == 48)?1'd1:1'd0; 
+			end
+		endcase
+	end
+end
+
+
+
+//send_count
+always@(posedge clk)begin
+	if(reset) begin
+		send_count <= 6'd0;
+	end
+	else begin
+		case(DT_i)
+			2'b01:begin
+				send_count <= (send_count == 48)?6'd0:send_count + 6'd1;
+			end
+			2'b10:begin
+				send_count <= (send_count == 48)?6'd0:send_count + 6'd1;
+			end
+			default : 
+				send_count <= 6'd0;
+
+		endcase
+	end
+
+end
+
+//DT_O
+always@(posedge clk)begin
+	if(reset)begin
+		DT_O <=2'd0;
+	end
+	else begin
+		if(TD_i) begin
+			DT_O <=2'd0;
+		end
+		else begin
+			DT_O <= DT_i;
+		end
+	end
+end
+
+//DT_O_buf
+always@(posedge clk) begin
+	if(reset) begin
+		DT_O_buf <= 2'd0;
+	end
+	else begin
+		DT_O_buf <= DT_O;
+	end
+
+end
+
+//CNT_O_shift
+always @(posedge clk) begin
+	if(reset) begin
+		CNT_O_shift <= 48'd0;
+	end
+	else begin
+		if(DT_i == 2'b01) begin
+			if(send_count==6'd0) begin
+				CNT_O_shift <= CNT_temp;
+			end
+			else begin
+				//if(TD_i == 1'd1)begin
+				//	CNT_O_shift <= CNT_O_shift;
+				//end
+				//else begin
+				CNT_O_shift <= {CNT_O_shift[46:0],1'd0};
+				///end
+			end
+		end
+		else begin
+			CNT_O_shift <= CNT_O_shift;
+		end
+	end
+end
+
+//CNT_O
+always@(posedge clk)begin
+	if(reset)begin
+		CNT_O <= 1'd0;
+	end
+	else begin
+		CNT_O <= CNT_O_shift[47];
+	end
+end
+
+//HC_O_shift
+always @(posedge clk) begin
+	if(reset) begin
+		HC_O_shift <= 48'd0;
+	end
+	else begin
+		if(DT_i == 2'b10) begin
+			if(send_count==6'd0) begin
+				HC_O_shift <= HC_temp;
+			end
+			else begin
+				//if(TD_i == 1'd1)begin
+				//	HC_O_shift <= HC_O_shift;
+				//end
+				//else begin
+				HC_O_shift <= {HC_O_shift[46:0],1'd0};
+				//end
+			end
+		end
+		else begin
+			HC_O_shift <= HC_O_shift;
+		end
+	end
+end
+
+//HC_O
+always@(posedge clk)begin
+	if(reset)begin
+		HC_O <= 1'd0;
+	end
+	else begin
+		HC_O <= HC_O_shift[47];
+	end
+end
+
+//M_O_shift
+always @(posedge clk) begin
+	if(reset) begin
+		M_O_shift <= 48'd0;
+	end
+	else begin
+		if(DT_i == 2'b10) begin
+			if(send_count==6'd0) begin
+				M_O_shift <= M_temp;
+			end
+			else begin
+				//if(TD_i == 1'd1)begin
+				//	M_O_shift <= M_O_shift;
+				//end
+				//else begin
+				M_O_shift <= {M_O_shift[46:0],1'd0};
+				//end
+			end
+		end
+		else begin
+			M_O_shift <= M_O_shift;
+		end
+	end
+end
+
+//M_O
+always@(posedge clk)begin
+	if(reset)begin
+		M_O <= 1'd0;
+	end
+	else begin
+		M_O <= M_O_shift[47];
+	end
+end
+
+endmodule
 
 
 
 
 module huffman(clk, reset,gray_data , gray_valid, CNT_valid, CNT1, CNT2, CNT3, CNT4, CNT5, CNT6,
-    code_valid, HC1, HC2, HC3, HC4, HC5, HC6,M1, M2, M3, M4, M5, M6 );
+    code_valid, HC1, HC2, HC3, HC4, HC5, HC6,M1, M2, M3, M4, M5, M6, TD, DT);
 
 input clk;
 input reset;
 input gray_valid;
-input [7:0] gray_data;//2:0
+input [2:0] gray_data;//2:0
 output reg CNT_valid;	
 output reg [7:0] CNT1, CNT2, CNT3, CNT4, CNT5, CNT6;//
 output reg code_valid;
 output reg [7:0] HC1, HC2, HC3, HC4, HC5, HC6;
 output reg [7:0] M1, M2, M3, M4, M5, M6;
+
+
+input TD;
+output reg [1:0] DT;
+
+
 //============================================
 parameter idle       	 = 5'd0;   // idle
 parameter rec        	 = 5'd1;   //reset 
@@ -48,6 +296,10 @@ parameter split_1        = 5'd23;  //
 parameter split_5        = 5'd24;  //
 parameter code_valid_OUT = 5'd25;  //結束狀態
 
+parameter send_cnt       = 5'd26;
+parameter send_result    = 5'd27;
+
+
 //============================================
 wire ini_sort_3_finish;
 wire insert_1_finish,insert_3_finish,insert_2_finish;
@@ -55,6 +307,7 @@ wire com_out_1;
 wire equal_signal_1;
 wire com1_is_zero_1;
 wire com2_is_zero_1;
+wire com_index;
 wire [6:0] merge_cnt;
 wire [5:0] merge_index;
 wire [6:0] which_one_have_be_put,  the_inverse_one_have_be_put;
@@ -119,6 +372,24 @@ parameter symbol6 	= 6'b100000;
 	//  - symbol split
 //============================================ INDEX ==========================================
 
+
+//DT
+always @(*) begin
+	case (cs)
+		send_cnt: begin
+			DT = 2'b01;
+		end
+		send_result : begin
+			DT = 2'b10;
+		end
+		default :
+			DT = 2'b00;
+	endcase
+end
+
+
+
+
 // FSM  done
 always @ (*) begin
 	case(cs)
@@ -129,12 +400,19 @@ always @ (*) begin
 				ns = idle;
 		rec : //receive gray data
 			if(!gray_valid) begin
-				ns = CNT_OUT;
+				ns = send_cnt;
 			end
 			else begin
 				ns = rec;
 			end
-			
+
+		send_cnt : 
+			if(TD) begin
+				ns = CNT_OUT;
+			end
+			else begin
+				ns = send_cnt;
+			end
 		CNT_OUT :
 			ns = ini_sort_1_1;
 		ini_sort_1_1 :
@@ -209,11 +487,20 @@ always @ (*) begin
 		
 		split_1: begin
 			if(split_finish) begin
-				ns = split_5;
+				ns = send_result;
 			end
 			else begin
 				ns = split_1;
 			end
+		end
+		send_result : begin
+			if(TD) begin
+				ns = split_5;
+			end
+			else begin
+				ns = send_result;
+			end
+
 		end
 
 		split_5:
@@ -285,7 +572,7 @@ always@(posedge clk) begin
 		TABLE_idx[6] <= 6'd0;
 	end
 	else if (gray_valid)
-		case(gray_data[2:0]) 
+		case(gray_data) 
 		3'd1 : CNT1 <= CNT1 + 1;
 		3'd2 : CNT2 <= CNT2 + 1;
 		3'd3 : CNT3 <= CNT3 + 1;
@@ -488,7 +775,7 @@ always@(posedge clk) begin
 		endcase
 	end
 end
- 
+
 //code valid///////////////
 always@(posedge clk) begin
 	if (reset) begin

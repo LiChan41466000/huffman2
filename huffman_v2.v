@@ -45,6 +45,7 @@ wire com_out_1;
 wire equal_signal_1;
 wire com1_is_zero_1;
 wire com2_is_zero_1;
+wire com_index;
 wire [6:0] merge_cnt;
 wire [5:0] merge_index;
 wire [6:0] which_one_have_be_put,  the_inverse_one_have_be_put;
